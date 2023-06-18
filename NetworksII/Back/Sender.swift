@@ -17,6 +17,7 @@ protocol SenderDelegate: AnyObject {
 final class Sender: ObservableObject, Identifiable {
 
     let id: Int
+    let position: (Int, Int)
 
     @Published var control: Double = 0
     @Published var sensingTime: Double
@@ -36,12 +37,13 @@ final class Sender: ObservableObject, Identifiable {
     @Published var senderInfo: (String?, String?)
 
 
-    var status: SenderStatus = SenderStatus.cantSendData
+    @Published var status: SenderStatus = SenderStatus.cantSendData
 
     let clock = ContinuousClock()
 
-    init(id: Int = 1, sensingTime: Double = 3, dataSize: Double = 4, maxAttempts: Int = 5) {
+    init(id: Int, position: (Int, Int), sensingTime: Double = 3, dataSize: Double = 4, maxAttempts: Int = 5) {
         self.id = id
+        self.position = position
         self.sensingTime = sensingTime
         self.dataSize = dataSize
         self.maxAttempts = maxAttempts
@@ -50,6 +52,7 @@ final class Sender: ObservableObject, Identifiable {
     }
 
     public func run(_ channel: TransmissionChannel) {
+        print("sender\(self.id): \(self.status.rawValue)")
         switch self.status {
         case .sensingChannel:
             self.senseChannel(channel)
@@ -61,7 +64,6 @@ final class Sender: ObservableObject, Identifiable {
         case .cantSendData:
             self.status = .sensingChannel
         case .channelCrash:
-            //print("Channel Crash")
             self.senderInfo.0 = "Channel Crash"
             self.status = .backoff
         case .backoff:
@@ -154,11 +156,11 @@ final class Sender: ObservableObject, Identifiable {
 
 }
 
-enum SenderStatus {
-    case sensingChannel
-    case sendingData
-    case canSendData
-    case cantSendData
-    case channelCrash
-    case backoff
+enum SenderStatus: String {
+    case sensingChannel = "sensingChannel"
+    case sendingData = "sendingData"
+    case canSendData = "canSendData"
+    case cantSendData = "cantSendData"
+    case channelCrash = "channelCrash"
+    case backoff = "backoff"
 }
