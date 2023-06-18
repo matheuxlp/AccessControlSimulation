@@ -17,7 +17,7 @@ protocol SenderDelegate: AnyObject {
 final class Sender: ObservableObject, Identifiable {
 
     let id: Int
-    let position: (Int, Int)
+    var position: (Int, Int)
 
     @Published var control: Double = 0
     @Published var sensingTime: Double

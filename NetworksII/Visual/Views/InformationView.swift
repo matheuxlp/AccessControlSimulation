@@ -16,6 +16,11 @@ struct InformationView: View {
                 .ignoresSafeArea()
             VStack {
                 Button {
+                    print(self.simulation.connectedSenders)
+                } label: {
+                    Text("Connected Senders")
+                }
+                Button {
                     switch self.simulation.status {
                     case .running:
                         self.simulation.status = .paused

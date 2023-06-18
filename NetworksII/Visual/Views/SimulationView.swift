@@ -31,8 +31,8 @@ struct SimulationSquare: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                //LinesView(geometry: geometry)
-                SendersView(geometry: geometry)
+                LinesView(geometry: geometry)
+                SendersView(connectedSenders: self.$simulation.connectedSenders, channel: self.$simulation.channel, numberSquares: self.simulation.numberSquares, geometry: geometry)
             }
         }
         .border(.green)

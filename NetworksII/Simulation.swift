@@ -14,7 +14,7 @@ final class Simulation: ObservableObject {
     @Published var connectedTimer: Cancellable? = nil
     @Published var numberSquares: Int
     @Published var channel: TransmissionChannel
-    @Published var connectedSenders: [[Sender]]
+    @Published var connectedSenders: [Sender]
     @Published var status: SimulationStatus
     @Published var speed: Double
 
@@ -36,25 +36,29 @@ final class Simulation: ObservableObject {
             return
         case .running:
             print("running")
-//            for index in 0..<self.connectedSenders.count {
-//                self.connectedSenders[index].run(self.channel)
-//            }
-//            self.channel.checkStatus()
+            for index in 0..<self.connectedSenders.count {
+                self.connectedSenders[index].run(self.channel)
+            }
+            self.channel.checkStatus()
         }
     }
 
     func tappedSender(_ position: (Int, Int)) {
-//        if let index = self.connectedSenders.firstIndex(where: {$0.position == position}) {
-//            self.connectedSenders.remove(at: index)
-//        } else {
-//            self.connectedSenders.append(Sender(id: self.connectedSenders.count + 1, position: position))
-//            self.channel.connectSender(self.connectedSenders.last!)
-//        }
+        if let index = self.connectedSenders.firstIndex(where: {$0.position == position}) {
+            self.connectedSenders.remove(at: index)
+        } else {
+            self.connectedSenders.append(Sender(id: self.connectedSenders.count + 1, position: position))
+            self.channel.connectSender(self.connectedSenders.last!)
+        }
     }
 
-//    func getSender(_ position: (Int, Int)) -> Sender? {
-//        //return self.connectedSenders.first(where: {$0.position == position})
-//    }
+    func getSender(_ position: (Int, Int)) -> Sender? {
+        if let sender = self.connectedSenders.first(where: {$0.position == position}) {
+            print(sender.status)
+            return sender
+        }
+        return nil
+    }
 
     func instantiateTimer() {
         print("initiated")
