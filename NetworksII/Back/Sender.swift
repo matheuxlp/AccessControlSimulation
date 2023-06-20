@@ -16,7 +16,7 @@ protocol SenderDelegate: AnyObject {
 
 final class Sender: ObservableObject, Identifiable {
 
-    let id: Int
+    var id: Int
     var position: (Int, Int)
 
     @Published var control: Double = 0
@@ -28,6 +28,8 @@ final class Sender: ObservableObject, Identifiable {
     @Published var currentAttempt: Int = 0
     @Published var maxAttempts: Int
     @Published var backoff: Double?
+
+    @Published var color: Color = .black
 
     //DELEGATE
     weak var delegate: SenderDelegate?
@@ -41,11 +43,11 @@ final class Sender: ObservableObject, Identifiable {
 
     let clock = ContinuousClock()
 
-    init(id: Int, position: (Int, Int), sensingTime: Double = 3, dataSize: Double = 4, maxAttempts: Int = 5) {
+    init(id: Int, position: (Int, Int), sensingTime: Double, dataSize: Double, maxAttempts: Int) {
         self.id = id
         self.position = position
         self.sensingTime = sensingTime
-        self.dataSize = Double(Int.random(in: 1...3))
+        self.dataSize = dataSize
         self.maxAttempts = maxAttempts
         NotificationCenter.default.addObserver(self, selector: #selector(self.recivedCrash(notification:)), name: Notification.Name("CrashIdentified"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(self.recivedCanSend(notification:)), name: Notification.Name("Sender\(id)CanSend"), object: nil)
@@ -67,37 +69,34 @@ final class Sender: ObservableObject, Identifiable {
         case .backoff:
             self.performBackoff()
         }
+        self.setColor()
+    }
+
+    func setId(_ id: Int) {
+        self.id = id
     }
 
     func performBackoff() {
-        print("\nSender #\(self.id) - IN BACKOFF")
         if self.backoff == nil {
-            print("BACKOFF STARTED")
             self.control = 0
             self.backoff = self.getBackoffTime()
         } else if self.currentAttempt == self.maxAttempts {
-            print("RESETING BACKOFF")
             self.currentAttempt = 0
             self.backoff = nil
             return
         }
         if self.control == self.backoff {
-            print("BACKOFF ENDED")
             self.control = 0
             self.currentAttempt += 1
             self.backoff = nil
             self.status = .sensingChannel
         } else {
-            print("BACKOFF CONTINUED")
             self.control += 1
         }
     }
 
     func getBackoffTime() -> TimeInterval {
         let backoffTime = Int(pow(2.0, Double(self.currentAttempt)))
-        print("Sender #\(self.id) current attempt: \(self.currentAttempt)")
-        print("Sender #\(self.id) backoff time: \(backoffTime)")
-        print()
         return Double(backoffTime)
     }
 
@@ -128,7 +127,23 @@ final class Sender: ObservableObject, Identifiable {
             self.delegate?.dataSent(self.id, clock.now)
             self.status = .sensingChannel
             self.control = 0
-            self.sensingTime += 3
+        }
+    }
+
+    func setColor() {
+        switch self.status {
+        case .sensingChannel:
+            color = .cyan
+        case .sendingData:
+            color = .green
+        case .canSendData:
+            color = .green
+        case .cantSendData:
+            color = .black
+        case .channelCrash:
+            color = .red
+        case .backoff:
+            color = .black
         }
     }
 
@@ -143,10 +158,10 @@ final class Sender: ObservableObject, Identifiable {
 }
 
 enum SenderStatus: String {
-    case sensingChannel = "sensingChannel"
-    case sendingData = "sendingData"
-    case canSendData = "canSendData"
-    case cantSendData = "cantSendData"
-    case channelCrash = "channelCrash"
-    case backoff = "backoff"
+    case sensingChannel = "Sensing"
+    case sendingData = "Sending data"
+    case canSendData = "Can send data"
+    case cantSendData = "Can't send data"
+    case channelCrash = "Crash"
+    case backoff = "Backoff"
 }

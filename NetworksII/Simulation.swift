@@ -19,7 +19,7 @@ final class Simulation: ObservableObject {
     @Published var speed: Double
 
     init() {
-        self.totalSenders = TotalSenders.eight
+        self.totalSenders = TotalSenders.sixteen
         self.channel = TransmissionChannel()
         self.connectedSenders = []
         self.status = .paused
@@ -42,11 +42,24 @@ final class Simulation: ObservableObject {
         }
     }
 
+    func createSender(_ position: (Int, Int)) -> Sender {
+        var sensingTime = Double(Int.random(in: 1...10))
+        if !self.connectedSenders.isEmpty {
+            for sender in self.connectedSenders {
+                if (sender.sensingTime - 1) == sensingTime {
+                    sensingTime += 1
+                }
+            }
+        }
+        let dataSize = Double(Int.random(in: 1...20))
+        return Sender(id: (self.connectedSenders.count - 1), position: position, sensingTime: sensingTime, dataSize: dataSize, maxAttempts: 5)
+    }
+
     func tappedSender(_ position: (Int, Int)) {
         if let index = self.connectedSenders.firstIndex(where: {$0.position == position}) {
             self.connectedSenders.remove(at: index)
         } else {
-            self.connectedSenders.append(Sender(id: self.connectedSenders.count + 1, position: position))
+            self.connectedSenders.append(self.createSender(position))
             self.channel.connectSender(self.connectedSenders.last!)
         }
     }

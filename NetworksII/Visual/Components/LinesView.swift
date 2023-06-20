@@ -21,7 +21,9 @@ struct LinesView: View {
                         let position: (Int, Int) = (row, column)
                         GeometryReader { geo in
                             if self.isEdge(row, column) {
-                                self.buildPath(position, geo)
+                                if let sender = self.connectedSenders.first(where: {$0.position == position}) {
+                                    LineView(sender: sender, geometry: geo, numberSquares: self.numberSquares)
+                                }
                             }
                         }
                         .frame(size: geometry.size.height / CGFloat(self.numberSquares))
@@ -60,13 +62,39 @@ struct LinesView: View {
         return self.connectedSenders.contains(where: {$0.position == position})
     }
 
-    @ViewBuilder private func buildPath(_ position: (Int, Int), _ geometry: GeometryProxy) -> some View {
+}
+
+struct LineView: View {
+    @ObservedObject var sender: Sender
+    let geometry: GeometryProxy
+    let numberSquares: Int
+
+    var body: some View {
         Path { path in
             path.move(to: CGPoint(x: geometry.frame(in: .local).midX,
                                   y: geometry.frame(in: .local).midY))
             path.addLine(to: getCenter(geometry))
         }
-        .stroke(style: StrokeStyle(lineWidth: 1, dash: [hasSender(position) ? 1 : 5]))
-        .stroke(hasSender(position) ? .yellow : .black, lineWidth: 1)
+        .stroke(style: StrokeStyle(lineWidth: 1, dash: [1]))
+        .stroke(self.sender.color, lineWidth: 1)
+    }
+
+    private func getCenter(_ geo: GeometryProxy) -> CGPoint {
+        let center = geo.frame(in: .local).midX * CGFloat((self.numberSquares + 1))
+        let midPoint = CGPoint(x: geo.frame(in: .named("Custom")).midX, y: geo.frame(in: .named("Custom")).midY)
+        let distX: CGFloat = self.getDistance(midPoint.x, center)
+        let distY: CGFloat = self.getDistance(midPoint.y, center)
+        let centerPoint = CGPoint(x: distX, y: distY)
+        return centerPoint
+    }
+
+    private func getDistance(_ midPoint: CGFloat, _ center: CGFloat) -> CGFloat {
+        var distance: CGFloat = 0
+        if midPoint > center {
+            distance -= (midPoint - center)
+        } else if midPoint < center {
+            distance += (center - midPoint)
+        }
+        return distance
     }
 }

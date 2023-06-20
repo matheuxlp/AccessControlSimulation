@@ -44,7 +44,8 @@ extension TransmissionChannel: SenderDelegate {
     }
 
     func startedToSendData(_ id: Int) {
-        //print("Sender #\(id), started to send data.")
+        print("Sender #\(id), started to send data.")
+        print(status)
         self.channelInfo = "Sender #\(id), started to send data."
         self.status = .occupied
         self.recivingFrom.append(id)

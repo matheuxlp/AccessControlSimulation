@@ -11,11 +11,34 @@ import SwiftUI
 
 struct SimulationView: View {
 
+    @EnvironmentObject var simulation: Simulation
+
     var body: some View {
         GeometryReader { geometry in
             ZStack {
                 Color.gray
                     .ignoresSafeArea()
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button {
+                            switch self.simulation.status {
+                            case .running:
+                                self.simulation.status = .paused
+                            case .paused:
+                                self.simulation.status = .running
+                            }
+                        } label: {
+                            switch self.simulation.status {
+                            case .running:
+                                Text("Pause")
+                            case .paused:
+                                Text("Start")
+                            }
+                        }
+                    }
+                    Spacer()
+                }
                 SimulationSquare()
                     .frame(size: geometry.size.height)
             }

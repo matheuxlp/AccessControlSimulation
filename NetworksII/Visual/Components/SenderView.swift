@@ -44,15 +44,12 @@ struct SendersView: View {
             if self.sendersViewModel.hasSender(self.connectedSenders, position) {
                 SenderView(sender: self.connectedSenders.first(where: {$0.position == position})!)
                     .onTapGesture {
-                        if let index = self.connectedSenders.firstIndex(where: {$0.position == position}) {
-                            self.connectedSenders.remove(at: index)
-                        }
+                        self.sendersViewModel.removeSender(self.$connectedSenders, self.$channel, position)
                     }
             } else {
                 Text("NaN")
                     .onTapGesture {
-                        self.connectedSenders.append(Sender(id: self.connectedSenders.count + 1, position: position))
-                        self.channel.connectSender(self.connectedSenders.last!)
+                        self.sendersViewModel.addSender(self.$connectedSenders, self.$channel, position)
                     }
             }
         } else {
@@ -71,6 +68,35 @@ final class SendersViewModel: ObservableObject {
         return array.contains(where: {$0.position == position})
     }
 
+    func createSender(_ connectedSenders: [Sender], _ position: (Int, Int)) -> Sender {
+        var sensingTime = Double(Int.random(in: 3...10))
+        if !connectedSenders.isEmpty {
+            for sender in connectedSenders {
+                if (sender.sensingTime - 1) <= sensingTime {
+                    sensingTime += 2
+                }
+            }
+        }
+        let dataSize = Double(Int.random(in: 1...20))
+        return Sender(id: (connectedSenders.count + 1), position: position, sensingTime: sensingTime, dataSize: dataSize, maxAttempts: 5)
+    }
+
+    func addSender(_ connectedSenders: Binding<[Sender]>, _ channel: Binding<TransmissionChannel>, _ position: (Int, Int)) {
+        connectedSenders.wrappedValue.append(self.createSender(connectedSenders.wrappedValue, position))
+        channel.wrappedValue.connectSender(connectedSenders.wrappedValue.last!)
+    }
+
+    func removeSender(_ connectedSenders: Binding<[Sender]>, _ channel: Binding<TransmissionChannel>, _ position: (Int, Int)) {
+        if let index = connectedSenders.wrappedValue.firstIndex(where: {$0.position == position}) {
+            connectedSenders.wrappedValue.remove(at: index)
+        }
+        if !connectedSenders.isEmpty {
+            for index in 0..<connectedSenders.count {
+                connectedSenders[index].wrappedValue.setId(index + 1)
+            }
+        }
+    }
+
 }
 
 
@@ -78,20 +104,25 @@ struct SenderView: View {
     @ObservedObject var sender: Sender
 
     var body: some View {
-        ZStack {
-            Image(systemName: "display")
-                .font(.system(size: 32))
-                .symbolRenderingMode(.monochrome)
+        VStack {
+            ZStack {
+                Image(systemName: "display")
+                    .font(.system(size: 32))
+                    .symbolRenderingMode(.monochrome)
+                    .foregroundColor(.black)
+                Image(systemName: "xmark")
+                    .font(.system(size: 16, weight: .bold))
+                    .symbolRenderingMode(.monochrome)
+                    .foregroundColor(.red)
+                    .offset(y: 10)
+            }
+            Text("#\(self.sender.id)")
                 .foregroundColor(.black)
-                .padding(8)
-                .background(Color.white)
-                .clipShape(Circle())
-            Image(systemName: "xmark")
-                .font(.system(size: 16, weight: .bold))
-                .symbolRenderingMode(.monochrome)
-                .foregroundColor(.red)
-                .offset(y: 10)
         }
+        .padding(16)
+        .background(Color.white)
+        .clipShape(Circle())
+        .overlay(Circle().stroke(self.sender.color, lineWidth: 2))
     }
 
 }
