@@ -12,18 +12,18 @@ final class Simulation: ObservableObject {
     
     @Published var timer: Timer.TimerPublisher = Timer.publish(every: 1, on: .main, in: .common)
     @Published var connectedTimer: Cancellable? = nil
-    @Published var numberSquares: Int
+    @Published var totalSenders: Int
     @Published var channel: TransmissionChannel
     @Published var connectedSenders: [Sender]
     @Published var status: SimulationStatus
     @Published var speed: Double
 
     init() {
-        self.numberSquares = 5
+        self.totalSenders = TotalSenders.eight
         self.channel = TransmissionChannel()
         self.connectedSenders = []
         self.status = .paused
-        self.speed = 1
+        self.speed = 2
     }
 
     func start() {
@@ -35,7 +35,6 @@ final class Simulation: ObservableObject {
         case .paused:
             return
         case .running:
-            print("running")
             for index in 0..<self.connectedSenders.count {
                 self.connectedSenders[index].run(self.channel)
             }
@@ -54,28 +53,24 @@ final class Simulation: ObservableObject {
 
     func getSender(_ position: (Int, Int)) -> Sender? {
         if let sender = self.connectedSenders.first(where: {$0.position == position}) {
-            print(sender.status)
             return sender
         }
         return nil
     }
 
     func instantiateTimer() {
-        print("initiated")
         self.timer = Timer.publish(every: 1, on: .main, in: .common)
         self.connectedTimer = self.timer.connect()
         return
     }
 
     func restartTimer() {
-        print("restarted")
         self.timer = Timer.publish(every: (1 * self.speed), on: .main, in: .common)
         self.instantiateTimer()
         return
     }
 
     func cancelTimer() {
-        print("canceled")
         self.connectedTimer?.cancel()
         return
     }
@@ -98,4 +93,9 @@ final class Simulation: ObservableObject {
 enum SimulationStatus {
     case running
     case paused
+}
+
+enum TotalSenders {
+    public static let eight: Int = 3
+    public static let sixteen: Int = 5
 }

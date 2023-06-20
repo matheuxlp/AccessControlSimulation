@@ -15,40 +15,59 @@ struct InformationView: View {
             Color.pink
                 .ignoresSafeArea()
             VStack {
-                Button {
-                    print(self.simulation.connectedSenders)
-                } label: {
-                    Text("Connected Senders")
-                }
-                Button {
-                    switch self.simulation.status {
-                    case .running:
-                        self.simulation.status = .paused
-                    case .paused:
-                        self.simulation.status = .running
-                    }
-                } label: {
-                    switch self.simulation.status {
-                    case .running:
-                        Text("Pause")
-                    case .paused:
-                        Text("Start")
+                ChannelInformationView(channel: self.simulation.channel)
+                ForEach(Array(stride(from: 0, to: self.simulation.connectedSenders.count, by: 2)), id: \.self) { index in
+                    HStack {
+                        SenderInformationView(sender: self.simulation.connectedSenders[index])
+                        if self.simulation.connectedSenders.count > (index + 1) {
+                            SenderInformationView(sender: self.simulation.connectedSenders[index + 1])
+                        }
                     }
                 }
-                HStack {
-                    Button {
-                        self.simulation.changeSpeed(false)
-                    } label: {
-                        Text("-")
-                    }
-                    Text("\(self.simulation.speed, specifier: "%.1f")")
-                    Button {
-                        self.simulation.changeSpeed()
-                    } label: {
-                        Text("+")
-                    }
-                }
+                Spacer()
             }
         }
+    }
+}
+
+
+struct SenderInformationView: View {
+    @ObservedObject var sender: Sender
+
+    var body: some View {
+        VStack(alignment: .leading) {
+            Image(systemName: "display")
+                .font(.system(size: 32))
+                .symbolRenderingMode(.monochrome)
+                .foregroundColor(.black)
+                .padding(8)
+                .background(Color.white)
+                .clipShape(Circle())
+            Text("Status: \(self.sender.status.rawValue)")
+            Text("Sensing Time: \(sender.sensingTime, specifier: "%.0f")")
+            Text("Data Size: \(sender.dataSize, specifier: "%.0f")")
+        }
+    }
+}
+
+struct ChannelInformationView: View {
+    @ObservedObject var channel: TransmissionChannel
+
+    var body: some View {
+        HStack {
+            VStack {
+                Image(systemName: "display")
+                    .font(.system(size: 32))
+                    .symbolRenderingMode(.monochrome)
+                    .foregroundColor(.black)
+                    .padding(8)
+                    .background(Color.white)
+                    .clipShape(Circle())
+                Text("Status: \(self.channel.status.rawValue)")
+            }
+            Spacer()
+        }
+        .padding(16)
+        .border(.black)
     }
 }

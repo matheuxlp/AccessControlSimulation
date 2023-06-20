@@ -25,26 +25,38 @@ struct SendersView: View {
                             if row == (self.numberSquares / 2) && column == (self.numberSquares / 2) {
                                 ChannelView(size: geometry.size.height)
                             } else {
-                                if self.sendersViewModel.hasSender(self.connectedSenders, position) {
-                                    SenderView(sender: self.connectedSenders.first(where: {$0.position == position})!)
-                                        .onTapGesture {
-                                            if let index = self.connectedSenders.firstIndex(where: {$0.position == position}) {
-                                                self.connectedSenders.remove(at: index)
-                                            }
-                                        }
-                                } else {
-                                    Text("NaN")
-                                        .onTapGesture {
-                                            self.connectedSenders.append(Sender(id: self.connectedSenders.count + 1, position: position))
-                                            self.channel.connectSender(self.connectedSenders.last!)
-                                        }
-                                }
+                                self.buildSender(position)
                             }
                         }
                         .frame(size: self.sendersViewModel.getSize(geometry.size.height, numberSquares: self.numberSquares))
                     }
                 }
             }
+        }
+    }
+
+    private func isEdge(_ row: Int, _ column: Int) -> Bool {
+        return row == 0 || column == 0 || row == (self.numberSquares - 1) || column == (self.numberSquares - 1)
+    }
+
+    @ViewBuilder private func buildSender(_ position: (Int, Int)) -> some View {
+        if self.isEdge(position.0, position.1) {
+            if self.sendersViewModel.hasSender(self.connectedSenders, position) {
+                SenderView(sender: self.connectedSenders.first(where: {$0.position == position})!)
+                    .onTapGesture {
+                        if let index = self.connectedSenders.firstIndex(where: {$0.position == position}) {
+                            self.connectedSenders.remove(at: index)
+                        }
+                    }
+            } else {
+                Text("NaN")
+                    .onTapGesture {
+                        self.connectedSenders.append(Sender(id: self.connectedSenders.count + 1, position: position))
+                        self.channel.connectSender(self.connectedSenders.last!)
+                    }
+            }
+        } else {
+            Rectangle().fill(.clear)
         }
     }
 }
@@ -66,7 +78,7 @@ struct SenderView: View {
     @ObservedObject var sender: Sender
 
     var body: some View {
-        VStack {
+        ZStack {
             Image(systemName: "display")
                 .font(.system(size: 32))
                 .symbolRenderingMode(.monochrome)
@@ -74,7 +86,11 @@ struct SenderView: View {
                 .padding(8)
                 .background(Color.white)
                 .clipShape(Circle())
-            Text("Status: \(self.sender.status.rawValue)")
+            Image(systemName: "xmark")
+                .font(.system(size: 16, weight: .bold))
+                .symbolRenderingMode(.monochrome)
+                .foregroundColor(.red)
+                .offset(y: 10)
         }
     }
 

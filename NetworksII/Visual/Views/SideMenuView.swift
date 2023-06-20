@@ -8,11 +8,44 @@
 import SwiftUI
 
 struct SideMenuView: View {
+    @EnvironmentObject var simulation: Simulation
     var body: some View {
         ZStack {
             VisualEffectView(material: NSVisualEffectView.Material.contentBackground, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)
             VStack {
-                Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+                Button {
+                    print(self.simulation.connectedSenders)
+                } label: {
+                    Text("Connected Senders")
+                }
+                Button {
+                    switch self.simulation.status {
+                    case .running:
+                        self.simulation.status = .paused
+                    case .paused:
+                        self.simulation.status = .running
+                    }
+                } label: {
+                    switch self.simulation.status {
+                    case .running:
+                        Text("Pause")
+                    case .paused:
+                        Text("Start")
+                    }
+                }
+                HStack {
+                    Button {
+                        self.simulation.changeSpeed(false)
+                    } label: {
+                        Text("-")
+                    }
+                    Text("\(self.simulation.speed, specifier: "%.1f")")
+                    Button {
+                        self.simulation.changeSpeed()
+                    } label: {
+                        Text("+")
+                    }
+                }
             }
         }
     }

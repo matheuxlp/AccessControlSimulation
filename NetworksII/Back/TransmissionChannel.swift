@@ -32,7 +32,7 @@ final class TransmissionChannel: ObservableObject {
 
 extension TransmissionChannel: SenderDelegate {
     func dataSent(_ id: Int, _ time: ContinuousClock.Instant) {
-        print("All data from: Sender #\(id) sent | TS: \(time)")
+        //print("All data from: Sender #\(id) sent | TS: \(time)")
         self.channelInfo = "All data from: Sender #\(id)"
         self.status = .free
         self.recivingFrom = []
@@ -40,11 +40,11 @@ extension TransmissionChannel: SenderDelegate {
 
     func sendData(_ id: Int, _ time: ContinuousClock.Instant) {
         self.channelInfo = "Recived data from: Sender #\(id)"
-        print("Recived data from: Sender #\(id) | TS: \(time)")
+        //print("Recived data from: Sender #\(id) | TS: \(time)")
     }
 
     func startedToSendData(_ id: Int) {
-        print("Sender #\(id), started to send data.")
+        //print("Sender #\(id), started to send data.")
         self.channelInfo = "Sender #\(id), started to send data."
         self.status = .occupied
         self.recivingFrom.append(id)

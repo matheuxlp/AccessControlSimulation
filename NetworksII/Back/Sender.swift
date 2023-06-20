@@ -45,21 +45,19 @@ final class Sender: ObservableObject, Identifiable {
         self.id = id
         self.position = position
         self.sensingTime = sensingTime
-        self.dataSize = dataSize
+        self.dataSize = Double(Int.random(in: 1...3))
         self.maxAttempts = maxAttempts
         NotificationCenter.default.addObserver(self, selector: #selector(self.recivedCrash(notification:)), name: Notification.Name("CrashIdentified"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(self.recivedCanSend(notification:)), name: Notification.Name("Sender\(id)CanSend"), object: nil)
     }
 
     public func run(_ channel: TransmissionChannel) {
-        print("sender\(self.id): \(self.status.rawValue)")
         switch self.status {
         case .sensingChannel:
             self.senseChannel(channel)
         case .sendingData:
             self.sendData()
         case .canSendData:
-            self.backoff = nil
             self.delegate?.startedToSendData(self.id)
         case .cantSendData:
             self.status = .sensingChannel
@@ -72,73 +70,61 @@ final class Sender: ObservableObject, Identifiable {
     }
 
     func performBackoff() {
-        // Backoff starts
+        print("\nSender #\(self.id) - IN BACKOFF")
         if self.backoff == nil {
-            self.senderInfo.0 = "Start Backoff"
-            self.currentAttempt = 1
+            print("BACKOFF STARTED")
             self.control = 0
             self.backoff = self.getBackoffTime()
-        } else {
-            self.currentAttempt += 1
-            if self.currentAttempt == self.maxAttempts {
-                self.senderInfo.0 = "Reseting Backoff"
-                self.backoff = nil
-            } else {
-                self.control += 1
-                if self.control == self.backoff {
-                    self.senderInfo.0 = "Backoff ended"
-                    self.status = .sensingChannel
-                    self.control = 0
-                }
-            }
+        } else if self.currentAttempt == self.maxAttempts {
+            print("RESETING BACKOFF")
+            self.currentAttempt = 0
+            self.backoff = nil
+            return
         }
-
+        if self.control == self.backoff {
+            print("BACKOFF ENDED")
+            self.control = 0
+            self.currentAttempt += 1
+            self.backoff = nil
+            self.status = .sensingChannel
+        } else {
+            print("BACKOFF CONTINUED")
+            self.control += 1
+        }
     }
 
     func getBackoffTime() -> TimeInterval {
-        let backoffTime = Int(pow(2.0, Double(currentAttempt)))
-        //print("backoffTime \(backoffTime)")
-
-        //print("Performing backoff for \(backoffTime) time units.")
-        self.senderInfo.0 = "Performing backoff for \(backoffTime) time units."
-        print(currentAttempt)
-        print(backoffTime)
+        let backoffTime = Int(pow(2.0, Double(self.currentAttempt)))
+        print("Sender #\(self.id) current attempt: \(self.currentAttempt)")
+        print("Sender #\(self.id) backoff time: \(backoffTime)")
+        print()
         return Double(backoffTime)
     }
 
     func senseChannel(_ channel: TransmissionChannel) {
-        //print("[Sender #\(self.id)]")
-        //print("Sensing channel...")
         self.senderInfo.0 = "Sensing channel..."
         self.control += 1
         if channel.status == .occupied {
             self.senderInfo.0 = "Channel Occupied!"
-            //print("Channel Occupied!")
-            self.status = .backoff
+            self.status = .sensingChannel
             self.control = 0
         } else {
             if self.control == self.sensingTime {
                 self.senderInfo.0 = "Can send Data!"
-                //print("Can send Data!\n")
-                //self.delegate?.startedToSendData(self.id)
                 self.status = .canSendData
                 self.control = 0
             } else {
                 self.senderInfo.0 = "Channel free!"
-                //print("Channel free!\n")
             }
         }
     }
 
     func sendData() {
-        //print("[Sender #\(self.id)]")
         self.control += 1
-        //print("Sending data...\n")
         self.senderInfo.0 = "Sending data..."
         self.delegate?.sendData(self.id, clock.now)
         if self.control == self.dataSize {
             self.senderInfo.0 = "Data sent!"
-            //print("Data sent!\n")
             self.delegate?.dataSent(self.id, clock.now)
             self.status = .sensingChannel
             self.control = 0
