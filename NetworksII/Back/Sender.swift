@@ -23,23 +23,20 @@ final class Sender: ObservableObject, Identifiable {
     @Published var sensingTime: Double
     @Published var dataSize: Double
     @Published var crash: Bool = false
+    @Published var color: Color = .black
+    @Published var status: SenderStatus = SenderStatus.cantSendData
+    @Published var timeRemaning: Double = 0
+    @Published var timeForNewData: Double = 0
 
     // BACKOFF
     @Published var currentAttempt: Int = 0
     @Published var maxAttempts: Int
     @Published var backoff: Double?
 
-    @Published var color: Color = .black
-
     //DELEGATE
     weak var delegate: SenderDelegate?
 
 
-    // INFOMRATION
-    @Published var senderInfo: (String?, String?)
-
-
-    @Published var status: SenderStatus = SenderStatus.cantSendData
 
     let clock = ContinuousClock()
 
@@ -64,16 +61,43 @@ final class Sender: ObservableObject, Identifiable {
         case .cantSendData:
             self.status = .sensingChannel
         case .channelCrash:
-            self.senderInfo.0 = "Channel Crash"
             self.status = .backoff
         case .backoff:
             self.performBackoff()
+        case .waitingForData:
+            self.waitForData()
         }
         self.setColor()
+        setTimeRemaining()
     }
 
     func setId(_ id: Int) {
         self.id = id
+    }
+
+    func setTimeRemaining() {
+        switch self.status {
+        case .backoff:
+            self.timeRemaning = self.backoff ?? 0 - self.control
+        case .sensingChannel:
+            self.timeRemaning = self.sensingTime - self.control
+        case .sendingData:
+            self.timeRemaning = self.dataSize - self.control
+        case .waitingForData:
+            self.timeRemaning = self.timeForNewData - self.control
+        default:
+            self.timeRemaning = 0
+        }
+    }
+
+    func waitForData() {
+        if self.timeForNewData == self.control {
+            self.timeForNewData = 0
+            self.control = 0
+            self.status = .sensingChannel
+        } else {
+            self.control += 1
+        }
     }
 
     func performBackoff() {
@@ -101,32 +125,27 @@ final class Sender: ObservableObject, Identifiable {
     }
 
     func senseChannel(_ channel: TransmissionChannel) {
-        self.senderInfo.0 = "Sensing channel..."
         self.control += 1
         if channel.status == .occupied {
-            self.senderInfo.0 = "Channel Occupied!"
             self.status = .sensingChannel
             self.control = 0
         } else {
             if self.control == self.sensingTime {
-                self.senderInfo.0 = "Can send Data!"
                 self.status = .canSendData
                 self.control = 0
             } else {
-                self.senderInfo.0 = "Channel free!"
             }
         }
     }
 
     func sendData() {
         self.control += 1
-        self.senderInfo.0 = "Sending data..."
         self.delegate?.sendData(self.id, clock.now)
         if self.control == self.dataSize {
-            self.senderInfo.0 = "Data sent!"
             self.delegate?.dataSent(self.id, clock.now)
-            self.status = .sensingChannel
+            self.status = .waitingForData
             self.control = 0
+            self.timeForNewData = Double(Int.random(in: 1...10))
         }
     }
 
@@ -139,11 +158,13 @@ final class Sender: ObservableObject, Identifiable {
         case .canSendData:
             color = .green
         case .cantSendData:
-            color = .black
+            color = .gray
         case .channelCrash:
             color = .red
         case .backoff:
-            color = .black
+            color = .gray
+        case .waitingForData:
+            color = .purple
         }
     }
 
@@ -164,4 +185,5 @@ enum SenderStatus: String {
     case cantSendData = "Can't send data"
     case channelCrash = "Crash"
     case backoff = "Backoff"
+    case waitingForData = "Waiting for data"
 }

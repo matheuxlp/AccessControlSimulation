@@ -19,7 +19,7 @@ final class Simulation: ObservableObject {
     @Published var speed: Double
 
     init() {
-        self.totalSenders = TotalSenders.sixteen
+        self.totalSenders = TotalSenders.eight
         self.channel = TransmissionChannel()
         self.connectedSenders = []
         self.status = .paused

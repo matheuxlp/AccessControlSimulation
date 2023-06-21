@@ -23,7 +23,7 @@ struct SendersView: View {
                         let position: (Int, Int) = (row, column)
                         Group {
                             if row == (self.numberSquares / 2) && column == (self.numberSquares / 2) {
-                                ChannelView(size: geometry.size.height)
+                                ChannelComponent(channel: self.channel)
                             } else {
                                 self.buildSender(position)
                             }
@@ -42,15 +42,25 @@ struct SendersView: View {
     @ViewBuilder private func buildSender(_ position: (Int, Int)) -> some View {
         if self.isEdge(position.0, position.1) {
             if self.sendersViewModel.hasSender(self.connectedSenders, position) {
-                SenderView(sender: self.connectedSenders.first(where: {$0.position == position})!)
+                SenderSimulationComponent(sender: self.connectedSenders.first(where: {$0.position == position})!)
                     .onTapGesture {
                         self.sendersViewModel.removeSender(self.$connectedSenders, self.$channel, position)
                     }
             } else {
-                Text("NaN")
-                    .onTapGesture {
-                        self.sendersViewModel.addSender(self.$connectedSenders, self.$channel, position)
+                ZStack {
+                    Color.gray.opacity(0.2)
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(.gray, lineWidth: 2)
+                    VStack(spacing: 8) {
+                        Image(systemName: "plus")
+                            .font(.system(size: 24, weight: .bold))
+                        Text("Add Sender")
                     }
+                }
+                .padding(64)
+                .onTapGesture {
+                    self.sendersViewModel.addSender(self.$connectedSenders, self.$channel, position)
+                }
             }
         } else {
             Rectangle().fill(.clear)
@@ -82,47 +92,22 @@ final class SendersViewModel: ObservableObject {
     }
 
     func addSender(_ connectedSenders: Binding<[Sender]>, _ channel: Binding<TransmissionChannel>, _ position: (Int, Int)) {
-        connectedSenders.wrappedValue.append(self.createSender(connectedSenders.wrappedValue, position))
-        channel.wrappedValue.connectSender(connectedSenders.wrappedValue.last!)
+        withAnimation {
+            connectedSenders.wrappedValue.append(self.createSender(connectedSenders.wrappedValue, position))
+            channel.wrappedValue.connectSender(connectedSenders.wrappedValue.last!)
+        }
     }
 
     func removeSender(_ connectedSenders: Binding<[Sender]>, _ channel: Binding<TransmissionChannel>, _ position: (Int, Int)) {
-        if let index = connectedSenders.wrappedValue.firstIndex(where: {$0.position == position}) {
-            connectedSenders.wrappedValue.remove(at: index)
-        }
-        if !connectedSenders.isEmpty {
-            for index in 0..<connectedSenders.count {
-                connectedSenders[index].wrappedValue.setId(index + 1)
+        withAnimation {
+            if let index = connectedSenders.wrappedValue.firstIndex(where: {$0.position == position}) {
+                connectedSenders.wrappedValue.remove(at: index)
+            }
+            if !connectedSenders.isEmpty {
+                for index in 0..<connectedSenders.count {
+                    connectedSenders[index].wrappedValue.setId(index + 1)
+                }
             }
         }
     }
-
-}
-
-
-struct SenderView: View {
-    @ObservedObject var sender: Sender
-
-    var body: some View {
-        VStack {
-            ZStack {
-                Image(systemName: "display")
-                    .font(.system(size: 32))
-                    .symbolRenderingMode(.monochrome)
-                    .foregroundColor(.black)
-                Image(systemName: "xmark")
-                    .font(.system(size: 16, weight: .bold))
-                    .symbolRenderingMode(.monochrome)
-                    .foregroundColor(.red)
-                    .offset(y: 10)
-            }
-            Text("#\(self.sender.id)")
-                .foregroundColor(.black)
-        }
-        .padding(16)
-        .background(Color.white)
-        .clipShape(Circle())
-        .overlay(Circle().stroke(self.sender.color, lineWidth: 2))
-    }
-
 }

@@ -13,6 +13,7 @@ final class TransmissionChannel: ObservableObject {
     @Published var status: ChannelStatus = ChannelStatus.free
     @Published var connectedSenders: [Sender] = []
     @Published var channelInfo: String?
+    @Published var color: Color = .black
     var recivingFrom: [Int] = []
     var hasCrash: Bool = false
 
@@ -36,6 +37,7 @@ extension TransmissionChannel: SenderDelegate {
         self.channelInfo = "All data from: Sender #\(id)"
         self.status = .free
         self.recivingFrom = []
+        self.color = .black
     }
 
     func sendData(_ id: Int, _ time: ContinuousClock.Instant) {
@@ -44,11 +46,10 @@ extension TransmissionChannel: SenderDelegate {
     }
 
     func startedToSendData(_ id: Int) {
-        print("Sender #\(id), started to send data.")
-        print(status)
         self.channelInfo = "Sender #\(id), started to send data."
         self.status = .occupied
         self.recivingFrom.append(id)
+        self.color = .green
         NotificationCenter.default.post(name: Notification.Name("Sender\(id)CanSend"), object: nil)
     }
 }

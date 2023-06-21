@@ -13,6 +13,7 @@ struct NetworksIIApp: App {
     var body: some Scene {
         WindowGroup {
             Main()
+                .preferredColorScheme(.dark)
                 .frame(minWidth: 1280, idealWidth: 1280, maxWidth: .infinity,
                        minHeight: 720, idealHeight: 720, maxHeight: .infinity)
                 .background(WindowAccessor(window: $window))

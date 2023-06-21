@@ -16,7 +16,7 @@ struct SimulationView: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                Color.gray
+                Color(.windowBackgroundColor)
                     .ignoresSafeArea()
                 VStack {
                     HStack {
@@ -60,23 +60,6 @@ struct SimulationSquare: View {
         }
         .border(.green)
         .padding(16)
-    }
-}
-
-struct ChannelView: View {
-
-    let size: CGFloat
-
-    var body: some View {
-        VStack {
-            Image(systemName: "circle.hexagongrid.circle")
-                .font(.system(size: 48))
-                .symbolRenderingMode(.monochrome)
-                .foregroundColor(.black)
-                .padding(2)
-                .background(Color.white)
-                .clipShape(Circle())
-        }
     }
 }
 
