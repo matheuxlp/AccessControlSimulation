@@ -144,6 +144,13 @@ struct DeviceInformationComponent: View {
                     Spacer()
                 }
             }
+            HStack {
+                Text("Wait time:")
+                withAnimation {
+                    Toggle("", isOn: self.$device.randonBackoff)
+                }
+                Spacer()
+            }
         }
         .padding(.trailing, 16)
 

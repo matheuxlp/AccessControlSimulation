@@ -27,14 +27,15 @@ final class Device: ObservableObject, Identifiable {
     @Published var status: DeviceStatus = DeviceStatus.cantSendData
     @Published var timeRemaining: Double = 0
     @Published var timeForNewData: Double = 0
-    @Published var randonBackoff: Bool = true
-    @Published var definedBackoff: Double = 0
+    @Published var waitForNewData: Bool = true
 
     // BACKOFF
     @Published var currentAttempt: Int = 1
     @Published var maxAttempts: Int
     @Published var initialBackoff: Double?
     @Published var currentBackoff: Double?
+    @Published var randonBackoff: Bool = true
+    @Published var definedBackoff: Double = 0
 
     //DELEGATE
     weak var delegate: DeviceDelegate?
@@ -105,9 +106,13 @@ extension Device { // logic
         self.delegate?.sendData(self.id, clock.now)
         if self.control == self.dataSize {
             self.delegate?.dataSent(self.id, clock.now)
-            self.status = .waitingForData
             self.control = 0
-            self.timeForNewData = Double(Int.random(in: 1...10))
+            if self.waitForNewData {
+                self.timeForNewData = Double(Int.random(in: 1...10))
+                self.status = .waitingForData
+            } else {
+                self.status = .sendingData
+            }
         }
     }
 }
@@ -208,6 +213,7 @@ extension Device {
         self.timeForNewData = 0
         self.randonBackoff = true
         self.definedBackoff = 0
+        self.waitForNewData = true
     }
 }
 
