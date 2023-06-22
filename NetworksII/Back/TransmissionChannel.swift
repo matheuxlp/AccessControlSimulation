@@ -11,20 +11,20 @@ import SwiftUI
 
 final class TransmissionChannel: ObservableObject {
     @Published var status: ChannelStatus = ChannelStatus.free
-    @Published var connectedSenders: [Sender] = []
+    @Published var connectedDevices: [Device] = []
     @Published var channelInfo: String?
     @Published var color: Color = .black
     var recivingFrom: [Int] = []
     var hasCrash: Bool = false
 
-    func connectSender(_ sender: Sender) {
-        sender.delegate = self
-        self.connectedSenders.append(sender)
+    func connectDevice(_ device: Device) {
+        device.delegate = self
+        self.connectedDevices.append(device)
     }
 
-    func disconnectSender(_ position: (Int, Int)) {
-        if let index = self.connectedSenders.firstIndex(where: {$0.position == position}) {
-            self.connectedSenders.remove(at: index)
+    func disconnectDevice(_ position: (Int, Int)) {
+        if let index = self.connectedDevices.firstIndex(where: {$0.position == position}) {
+            self.connectedDevices.remove(at: index)
         }
     }
 
@@ -39,26 +39,26 @@ final class TransmissionChannel: ObservableObject {
     }
 }
 
-extension TransmissionChannel: SenderDelegate {
+extension TransmissionChannel: DeviceDelegate {
     func dataSent(_ id: Int, _ time: ContinuousClock.Instant) {
-        //print("All data from: Sender #\(id) sent | TS: \(time)")
-        self.channelInfo = "All data from: Sender #\(id)"
+        //print("All data from: Device #\(id) sent | TS: \(time)")
+        self.channelInfo = "All data from: Device #\(id)"
         self.status = .free
         self.recivingFrom = []
         self.color = .black
     }
 
     func sendData(_ id: Int, _ time: ContinuousClock.Instant) {
-        self.channelInfo = "Recived data from: Sender #\(id)"
-        //print("Recived data from: Sender #\(id) | TS: \(time)")
+        self.channelInfo = "Recived data from: Device #\(id)"
+        //print("Recived data from: Device #\(id) | TS: \(time)")
     }
 
     func startedToSendData(_ id: Int) {
-        self.channelInfo = "Sender #\(id), started to send data."
+        self.channelInfo = "Device #\(id), started to send data."
         self.status = .occupied
         self.recivingFrom.append(id)
         self.color = .green
-        NotificationCenter.default.post(name: Notification.Name("Sender\(id)CanSend"), object: nil)
+        NotificationCenter.default.post(name: Notification.Name("Device\(id)CanSend"), object: nil)
     }
 }
 

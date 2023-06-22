@@ -12,16 +12,16 @@ final class Simulation: ObservableObject {
     
     @Published var timer: Timer.TimerPublisher = Timer.publish(every: 1, on: .main, in: .common)
     @Published var connectedTimer: Cancellable? = nil
-    @Published var totalSenders: Int
+    @Published var totalDevices: Int
     @Published var channel: TransmissionChannel
-    @Published var connectedSenders: [Sender]
+    @Published var connectedDevices: [Device]
     @Published var status: SimulationStatus
     @Published var speed: Double
 
     init() {
-        self.totalSenders = TotalSenders.eight
+        self.totalDevices = TotalDevices.eight
         self.channel = TransmissionChannel()
-        self.connectedSenders = []
+        self.connectedDevices = []
         self.status = .paused
         self.speed = 2
     }
@@ -35,25 +35,25 @@ final class Simulation: ObservableObject {
         case .paused:
             return
         case .running:
-            for index in 0..<self.connectedSenders.count {
-                self.connectedSenders[index].run(self.channel)
+            for index in 0..<self.connectedDevices.count {
+                self.connectedDevices[index].run(self.channel)
             }
             self.channel.checkStatus()
         }
     }
 
-    func tappedSender(_ position: (Int, Int)) {
-        if let index = self.connectedSenders.firstIndex(where: {$0.position == position}) {
-            self.connectedSenders.remove(at: index)
+    func tappedDevice(_ position: (Int, Int)) {
+        if let index = self.connectedDevices.firstIndex(where: {$0.position == position}) {
+            self.connectedDevices.remove(at: index)
         } else {
-            self.connectedSenders.append(self.createSender(position))
-            self.channel.connectSender(self.connectedSenders.last!)
+            self.connectedDevices.append(self.createDevice(position))
+            self.channel.connectDevice(self.connectedDevices.last!)
         }
     }
 
-    func getSender(_ position: (Int, Int)) -> Sender? {
-        if let sender = self.connectedSenders.first(where: {$0.position == position}) {
-            return sender
+    func getDevice(_ position: (Int, Int)) -> Device? {
+        if let device = self.connectedDevices.first(where: {$0.position == position}) {
+            return device
         }
         return nil
     }
@@ -95,7 +95,7 @@ enum SimulationStatus {
     case paused
 }
 
-enum TotalSenders {
+enum TotalDevices {
     public static let eight: Int = 3
     public static let sixteen: Int = 5
 }

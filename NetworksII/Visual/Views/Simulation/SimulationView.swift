@@ -6,7 +6,7 @@
 //
 
 //ChannelView(size: self.getSize(geo), centerPoint: self.$centerPoint)
-//SenderView(size: self.getSize(geo), centerPoint: self.$centerPoint)
+//DeviceView(size: self.getSize(geo), centerPoint: self.$centerPoint)
 import SwiftUI
 
 struct SimulationView: View {
@@ -20,10 +20,10 @@ struct SimulationView: View {
                     .ignoresSafeArea()
                 GeometryReader { innerGeometry in
                     ZStack {
-                        self.buildAreas(self.simulation.totalSenders, innerGeometry) {position in
+                        self.buildAreas(self.simulation.totalDevices, innerGeometry) {position in
                             self.buildLines(position)
                         }
-                        self.buildAreas(self.simulation.totalSenders, innerGeometry) { position in
+                        self.buildAreas(self.simulation.totalDevices, innerGeometry) { position in
                             self.buildElements(position)
                         }
                     }
@@ -37,46 +37,46 @@ struct SimulationView: View {
 
 extension Simulation {
     func isEdge(_ position: (Int, Int)) -> Bool {
-        return position.0 == 0 || position.1 == 0 || position.0 == (self.totalSenders - 1) || position.1 == (self.totalSenders - 1)
+        return position.0 == 0 || position.1 == 0 || position.0 == (self.totalDevices - 1) || position.1 == (self.totalDevices - 1)
     }
 
     func isMiddle(_ position: (Int, Int)) -> Bool {
-        return position.0 == (self.totalSenders / 2) && position.1 == (self.totalSenders / 2)
+        return position.0 == (self.totalDevices / 2) && position.1 == (self.totalDevices / 2)
     }
 
-    func senderExists(_ position: (Int, Int)) -> Bool {
-        return self.connectedSenders.contains(where: {$0.position == position})
+    func deviceExists(_ position: (Int, Int)) -> Bool {
+        return self.connectedDevices.contains(where: {$0.position == position})
     }
 
-    func addSender(position: (Int, Int)) {
+    func addDevice(position: (Int, Int)) {
         withAnimation {
-            self.connectedSenders.append(self.createSender(position))
-            self.channel.connectSender(connectedSenders.last!)
+            self.connectedDevices.append(self.createDevice(position))
+            self.channel.connectDevice(connectedDevices.last!)
         }
     }
 
-    func createSender(_ position: (Int, Int)) -> Sender {
+    func createDevice(_ position: (Int, Int)) -> Device {
         var sensingTime = Double(Int.random(in: 1...10))
-        if !self.connectedSenders.isEmpty {
-            for sender in self.connectedSenders {
-                if (sender.sensingTime - 1) == sensingTime {
+        if !self.connectedDevices.isEmpty {
+            for device in self.connectedDevices {
+                if (device.sensingTime - 1) == sensingTime {
                     sensingTime += 1
                 }
             }
         }
         let dataSize = Double(Int.random(in: 1...20))
-        return Sender(id: (self.connectedSenders.count + 1), position: position, sensingTime: sensingTime, dataSize: dataSize, maxAttempts: 5)
+        return Device(id: (self.connectedDevices.count + 1), position: position, sensingTime: sensingTime, dataSize: dataSize, maxAttempts: 5)
     }
 
-    func removeSender(position: (Int, Int)) {
+    func removeDevice(position: (Int, Int)) {
         withAnimation {
-            if let index = self.connectedSenders.firstIndex(where: {$0.position == position}) {
-                self.connectedSenders.remove(at: index)
-                self.channel.disconnectSender(position)
+            if let index = self.connectedDevices.firstIndex(where: {$0.position == position}) {
+                self.connectedDevices.remove(at: index)
+                self.channel.disconnectDevice(position)
             }
-            if !connectedSenders.isEmpty {
-                for index in 0..<connectedSenders.count {
-                    self.connectedSenders[index].setId(index + 1)
+            if !connectedDevices.isEmpty {
+                for index in 0..<connectedDevices.count {
+                    self.connectedDevices[index].setId(index + 1)
                 }
             }
         }
@@ -104,35 +104,35 @@ extension SimulationView { // lines
     private func buildLines(_ position: (Int, Int)) -> some View {
         GeometryReader { geo in
             if self.simulation.isEdge(position) {
-                if let sender = self.simulation.connectedSenders.first(where: {$0.position == position}) {
-                    LineComponent(sender: sender, geometry: geo, numberSquares: self.simulation.totalSenders)
+                if let device = self.simulation.connectedDevices.first(where: {$0.position == position}) {
+                    LineComponent(device: device, geometry: geo, numberSquares: self.simulation.totalDevices)
                 }
             }
         }
     }
 }
 
-extension SimulationView { // Senders & Channel
+extension SimulationView { // Devices & Channel
     @ViewBuilder
     private func buildElements(_ position: (Int, Int)) -> some View {
         if self.simulation.isMiddle(position) {
-            if !self.simulation.channel.connectedSenders.isEmpty {
+            if !self.simulation.channel.connectedDevices.isEmpty {
                 ChannelComponent(channel: self.simulation.channel)
             } else {
                 Text("a")
             }
         } else {
-            self.buildSender(position)
+            self.buildDevice(position)
         }
     }
 
-    @ViewBuilder private func buildSender(_ position: (Int, Int)) -> some View {
+    @ViewBuilder private func buildDevice(_ position: (Int, Int)) -> some View {
         if self.simulation.isEdge(position) {
-            if self.simulation.senderExists(position) {
-                SenderSimulationComponent(sender: self.simulation.connectedSenders.first(where: {$0.position == position})!)
+            if self.simulation.deviceExists(position) {
+                DeviceSimulationComponent(device: self.simulation.connectedDevices.first(where: {$0.position == position})!)
                     .onTapGesture {
                         if self.simulation.status != .running {
-                            self.simulation.removeSender(position: position)
+                            self.simulation.removeDevice(position: position)
                         }
                     }
             } else {
@@ -144,14 +144,14 @@ extension SimulationView { // Senders & Channel
                         VStack(spacing: 8) {
                             Image(systemName: "plus")
                                 .font(.system(size: 24, weight: .bold))
-                            Text("Add Sender")
+                            Text("Add Device")
                         }
                     }
                 }
                 .padding(64)
                 .onTapGesture {
                     if self.simulation.status != .running {
-                        self.simulation.addSender(position: position)
+                        self.simulation.addDevice(position: position)
                     }
                 }
             }

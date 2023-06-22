@@ -19,13 +19,13 @@ struct InformationView: View {
                     ChannelInformationComponent(channel: self.simulation.channel)
                         .padding(.bottom, 8)
                     ScrollView {
-                        if self.simulation.connectedSenders.isEmpty {
+                        if self.simulation.connectedDevices.isEmpty {
                             ZStack {
                                 Color.clear
                             }
                         } else {
-                            ForEach(0..<self.simulation.connectedSenders.count, id: \.self) { index in
-                                SenderInformationComponent(sender: self.simulation.connectedSenders[index])
+                            ForEach(0..<self.simulation.connectedDevices.count, id: \.self) { index in
+                                DeviceInformationComponent(device: self.simulation.connectedDevices[index])
                                     .padding(.horizontal, 16)
                             }
                         }

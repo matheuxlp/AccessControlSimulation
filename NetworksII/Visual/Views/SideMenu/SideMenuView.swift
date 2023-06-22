@@ -14,9 +14,9 @@ struct SideMenuView: View {
             VisualEffectView(material: NSVisualEffectView.Material.contentBackground, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)
             VStack {
                 Button {
-                    print(self.simulation.connectedSenders)
+                    print(self.simulation.connectedDevices)
                 } label: {
-                    Text("Connected Senders")
+                    Text("Connected Devices")
                 }
                 Button {
                     withAnimation {

@@ -1,5 +1,5 @@
 //
-//  SenderInformationComponent.swift
+//  DeviceInformationComponent.swift
 //  NetworksII
 //
 //  Created by Matheus Polonia on 20/06/23.
@@ -7,13 +7,13 @@
 
 import SwiftUI
 
-struct SenderInformationComponent: View {
-    @ObservedObject var sender: Sender
+struct DeviceInformationComponent: View {
+    @ObservedObject var device: Device
     @State var expanded: Bool = false
     var body: some View {
         ZStack {
             Color.gray.opacity(0.75)
-            self.sender.color.opacity(0.25)
+            self.device.color.opacity(0.25)
             HStack {
                 VStack(alignment: .leading) {
                     Image(systemName: "circle.dashed")
@@ -23,8 +23,8 @@ struct SenderInformationComponent: View {
                         .padding(8)
                         .background(Color.white)
                         .clipShape(Circle())
-                        .overlay(Circle().stroke(self.sender.color, lineWidth: 2))
-                    Text("Sender #\(sender.id)")
+                        .overlay(Circle().stroke(self.device.color, lineWidth: 2))
+                    Text("Device #\(device.id)")
                 }
                 if self.expanded {
                     self.buildEditable()
@@ -68,10 +68,10 @@ struct SenderInformationComponent: View {
     private func buildInformation() -> some View  {
         VStack(alignment: .leading) {
             Spacer()
-            Text("Status: \(self.sender.status.rawValue) | (\(self.sender.timeRemaning, specifier: "%.0f"))")
-            Text("Sensing time: \(sender.sensingTime, specifier: "%.0f")")
-            Text("Data size: \(sender.dataSize, specifier: "%.0f")")
-            Text("Time for new data: \(sender.timeForNewData, specifier: "%.0f")")
+            Text("Status: \(self.device.status.rawValue) | (\(self.device.timeRemaning, specifier: "%.0f"))")
+            Text("Sensing time: \(device.sensingTime, specifier: "%.0f")")
+            Text("Data size: \(device.dataSize, specifier: "%.0f")")
+            Text("Time for new data: \(device.timeForNewData, specifier: "%.0f")")
         }
     }
 
@@ -79,26 +79,26 @@ struct SenderInformationComponent: View {
     private func buildEditable() -> some View {
         VStack(alignment: .leading, spacing: 2) {
             HStack {
-                Text("Sensing time: \(self.sender.sensingTime, specifier: "%.0f")")
-                TextField("", value: self.$sender.sensingTime, format: .number)
+                Text("Sensing time: \(self.device.sensingTime, specifier: "%.0f")")
+                TextField("", value: self.$device.sensingTime, format: .number)
                 Spacer()
             }
             HStack {
-                Text("Data size: \(self.sender.dataSize, specifier: "%.0f")")
-                TextField("", value: self.$sender.dataSize, format: .number)
+                Text("Data size: \(self.device.dataSize, specifier: "%.0f")")
+                TextField("", value: self.$device.dataSize, format: .number)
                 Spacer()
             }
             HStack {
                 Text("Random Backoff:")
                 withAnimation {
-                    Toggle("", isOn: self.$sender.randonBackoff)
+                    Toggle("", isOn: self.$device.randonBackoff)
                 }
                 Spacer()
             }
-            if !self.sender.randonBackoff {
+            if !self.device.randonBackoff {
                 HStack {
                     Text("Backoff:")
-                    TextField("", value: self.$sender.definedBackoff, format: .number)
+                    TextField("", value: self.$device.definedBackoff, format: .number)
                     Spacer()
                 }
             }

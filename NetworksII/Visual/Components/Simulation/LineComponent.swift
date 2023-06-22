@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct LineComponent: View {
-    @ObservedObject var sender: Sender
+    @ObservedObject var device: Device
     @State private var value = 1.0
     let geometry: GeometryProxy
     let numberSquares: Int
@@ -19,9 +19,9 @@ struct LineComponent: View {
                                   y: geometry.frame(in: .local).midY))
             path.addLine(to: getCenter(geometry))
         }
-        .stroke(self.sender.color, lineWidth: 2)
-        .shadow(color: self.sender.color != .black ? self.sender.color.opacity(self.value) : .clear, radius: 3)
-        .onChange(of: self.sender.color, perform: { newValue in
+        .stroke(self.device.color, lineWidth: 2)
+        .shadow(color: self.device.color != .black ? self.device.color.opacity(self.value) : .clear, radius: 3)
+        .onChange(of: self.device.color, perform: { newValue in
             withAnimation(.easeInOut(duration: 2).repeatForever(autoreverses: true)) {
                 value = 0.5
             }
