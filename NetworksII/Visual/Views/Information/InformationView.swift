@@ -17,6 +17,7 @@ struct InformationView: View {
                     .ignoresSafeArea()
                 VStack(spacing: 0) {
                     ChannelInformationComponent(channel: self.simulation.channel)
+                    Divider()
                         .padding(.bottom, 8)
                     ScrollView {
                         if self.simulation.connectedDevices.isEmpty {

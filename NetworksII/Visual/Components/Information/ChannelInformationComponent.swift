@@ -11,24 +11,27 @@ struct ChannelInformationComponent: View {
     @ObservedObject var channel: TransmissionChannel
 
     var body: some View {
-        HStack {
+        HStack(alignment: .top) {
             VStack {
-                Image(systemName: "display")
-                    .font(.system(size: 32))
-                    .symbolRenderingMode(.monochrome)
-                    .foregroundColor(.black)
-                    .padding(8)
-                    .background(Color.white)
-                    .clipShape(Circle())
-                Text("Status: \(self.channel.status.rawValue)")
+                ChannelComponent(channel: self.channel)
             }
-            if let info = self.channel.channelInfo {
-                Text("\(info)")
+            VStack(alignment: .leading) {
+                Text("CHANNEL STATUS: \(self.channel.status.rawValue)")
+                    .bold()
+                HStack {
+                    if let firstInfo = self.channel.channelInfo.0 {
+                        Text("\(firstInfo)")
+                    }
+                    if let secondInfo = self.channel.channelInfo.1 {
+                        Text("\(secondInfo)")
+                            .bold()
+                    }
+                }
             }
+            .padding(.horizontal, 16)
             Spacer()
         }
         .padding(16)
-        .border(.black)
     }
 }
 

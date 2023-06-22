@@ -12,7 +12,7 @@ import SwiftUI
 final class TransmissionChannel: ObservableObject {
     @Published var status: ChannelStatus = ChannelStatus.free
     @Published var connectedDevices: [Device] = []
-    @Published var channelInfo: String?
+    @Published var channelInfo: (String?, String?)
     @Published var color: Color = .black
     var recivingFrom: [Int] = []
     var hasCrash: Bool = false
@@ -34,6 +34,7 @@ final class TransmissionChannel: ObservableObject {
         } else if self.recivingFrom.count > 1 {
             let channalDataDict:[String: [Int]] = ["data": self.recivingFrom]
             NotificationCenter.default.post(name: NSNotification.Name(rawValue: "CrashIdentified"), object: nil, userInfo: channalDataDict)
+            self.channelInfo = (nil, nil)
             self.recivingFrom = []
             self.status = .free
             self.color = .gray
@@ -48,7 +49,7 @@ extension TransmissionChannel {
         self.status = .free
         self.hasCrash = false
         self.color = .black
-        self.channelInfo = nil
+        self.channelInfo = (nil, nil)
     }
 
     func hasDevices() -> Bool {
@@ -58,20 +59,21 @@ extension TransmissionChannel {
 
 extension TransmissionChannel: DeviceDelegate {
     func dataSent(_ id: Int, _ time: ContinuousClock.Instant) {
-        //print("All data from: Device #\(id) sent | TS: \(time)")
-        self.channelInfo = "All data from: Device #\(id)"
+        self.channelInfo.0 = "All data from:"
+        self.channelInfo.1 = "Device #\(id)"
         self.status = .free
         self.recivingFrom = []
         self.color = .gray
+        self.channelInfo = (nil, nil)
     }
 
     func sendData(_ id: Int, _ time: ContinuousClock.Instant) {
-        self.channelInfo = "Recived data from: Device #\(id)"
-        //print("Recived data from: Device #\(id) | TS: \(time)")
+        self.channelInfo.0 = "Recived data from:"
+        self.channelInfo.1 = "Device #\(id)"
     }
 
     func startedToSendData(_ id: Int) {
-        self.channelInfo = "Device #\(id), started to send data."
+        self.channelInfo.0 = "Device #\(id), started to send data."
         self.status = .occupied
         self.recivingFrom.append(id)
         self.color = .green
