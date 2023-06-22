@@ -22,11 +22,19 @@ final class TransmissionChannel: ObservableObject {
         self.connectedSenders.append(sender)
     }
 
+    func disconnectSender(_ position: (Int, Int)) {
+        if let index = self.connectedSenders.firstIndex(where: {$0.position == position}) {
+            self.connectedSenders.remove(at: index)
+        }
+    }
+
     func checkStatus() {
         if self.recivingFrom.count > 1 {
-            NotificationCenter.default.post(name: Notification.Name("CrashIdentified"), object: nil)
+            let channalDataDict:[String: [Int]] = ["data": self.recivingFrom]
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "CrashIdentified"), object: nil, userInfo: channalDataDict)
             self.recivingFrom = []
             self.status = .free
+            self.color = .black
         }
     }
 }

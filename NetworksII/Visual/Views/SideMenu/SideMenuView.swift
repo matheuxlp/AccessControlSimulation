@@ -19,11 +19,13 @@ struct SideMenuView: View {
                     Text("Connected Senders")
                 }
                 Button {
-                    switch self.simulation.status {
-                    case .running:
-                        self.simulation.status = .paused
-                    case .paused:
-                        self.simulation.status = .running
+                    withAnimation {
+                        switch self.simulation.status {
+                        case .running:
+                            self.simulation.status = .paused
+                        case .paused:
+                            self.simulation.status = .running
+                        }
                     }
                 } label: {
                     switch self.simulation.status {

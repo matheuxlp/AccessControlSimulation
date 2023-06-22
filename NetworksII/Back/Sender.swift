@@ -27,16 +27,17 @@ final class Sender: ObservableObject, Identifiable {
     @Published var status: SenderStatus = SenderStatus.cantSendData
     @Published var timeRemaning: Double = 0
     @Published var timeForNewData: Double = 0
+    @Published var randonBackoff: Bool = true
+    @Published var definedBackoff: Double = 0
 
     // BACKOFF
     @Published var currentAttempt: Int = 0
     @Published var maxAttempts: Int
-    @Published var backoff: Double?
+    @Published var initialBackoff: Double?
+    @Published var currentbackoff: Double?
 
     //DELEGATE
     weak var delegate: SenderDelegate?
-
-
 
     let clock = ContinuousClock()
 
@@ -78,7 +79,9 @@ final class Sender: ObservableObject, Identifiable {
     func setTimeRemaining() {
         switch self.status {
         case .backoff:
-            self.timeRemaning = self.backoff ?? 0 - self.control
+            if let backoff = self.currentbackoff {
+                self.timeRemaning = backoff - control
+            }
         case .sensingChannel:
             self.timeRemaning = self.sensingTime - self.control
         case .sendingData:
@@ -101,27 +104,39 @@ final class Sender: ObservableObject, Identifiable {
     }
 
     func performBackoff() {
-        if self.backoff == nil {
+        if self.initialBackoff == nil {
+            if self.randonBackoff {
+                self.initialBackoff = Double(Int.random(in: 0...5))
+            } else {
+                self.initialBackoff = self.definedBackoff
+            }
+            self.currentbackoff = self.initialBackoff
             self.control = 0
-            self.backoff = self.getBackoffTime()
+        } else if self.currentbackoff == nil {
+            self.currentbackoff = self.getBackoffTime()
         } else if self.currentAttempt == self.maxAttempts {
             self.currentAttempt = 0
-            self.backoff = nil
+            self.initialBackoff = nil
+            self.currentbackoff = nil
             return
         }
-        if self.control == self.backoff {
+        if self.control == self.currentbackoff {
             self.control = 0
             self.currentAttempt += 1
-            self.backoff = nil
+            self.currentbackoff = nil
             self.status = .sensingChannel
         } else {
             self.control += 1
+            self.setTimeRemaining()
         }
     }
 
     func getBackoffTime() -> TimeInterval {
-        let backoffTime = Int(pow(2.0, Double(self.currentAttempt)))
-        return Double(backoffTime)
+        var backoff: Double = self.initialBackoff!
+        for _ in 0..<currentAttempt {
+            backoff = backoff * self.initialBackoff!
+        }
+        return backoff
     }
 
     func senseChannel(_ channel: TransmissionChannel) {
@@ -170,6 +185,15 @@ final class Sender: ObservableObject, Identifiable {
 
     @objc func recivedCrash(notification: Notification) {
         self.status = .channelCrash
+        if let data = notification.userInfo?["data"] as? [Int] {
+            if data.contains(self.id) {
+                self.color = .red
+            } else {
+                self.color = .gray
+            }
+        } else {
+            self.color = .gray
+        }
     }
 
     @objc func recivedCanSend(notification: Notification) {

@@ -27,7 +27,6 @@ struct Main: View {
                     }
                     .frame(width: geometry.frame(in: .global).width / 3)
                     SimulationView()
-                        .border(.blue)
                         .coordinateSpace(name: "simulation")
                 }
                 .environmentObject(self.simulation)
@@ -41,6 +40,34 @@ struct Main: View {
                         }
                     }, label: {
                         Image(systemName: "sidebar.leading")
+                    })
+                }
+                ToolbarItem(placement: .principal) {
+                    Button {
+                        withAnimation {
+                            switch self.simulation.status {
+                            case .running:
+                                self.simulation.status = .paused
+                            case .paused:
+                                self.simulation.status = .running
+                            }
+                        }
+                    } label: {
+                        switch self.simulation.status {
+                        case .running:
+                            Image(systemName: "pause.fill")
+                        case .paused:
+                            Image(systemName: "play.fill")
+                        }
+                    }
+                }
+                ToolbarItem(placement: .principal) {
+                    Button(action: {
+                        withAnimation {
+                            //self.showMenu.toggle()
+                        }
+                    }, label: {
+                        Image(systemName: "arrow.counterclockwise")
                     })
                 }
             }
