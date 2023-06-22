@@ -14,7 +14,7 @@ struct ChannelComponent: View {
 
     var body: some View {
         VStack {
-            Image(systemName: "circle.hexagongrid.circle")
+            Image(systemName: self.channel.hasDevices() ? "circle.hexagongrid.circle" : "circle")
                 .font(.system(size: 48))
                 .symbolRenderingMode(.palette)
                 .foregroundStyle(.white.opacity(0.75), self.channel.color)
@@ -26,7 +26,7 @@ struct ChannelComponent: View {
         .shadow(color: self.channel.color != .black ? self.channel.color.opacity(self.value) : .clear, radius: 3)
         .onChange(of: self.channel.color, perform: { _ in
             withAnimation(.easeInOut(duration: 2).repeatForever(autoreverses: true)) {
-                value = 0.3
+                self.value = 0.3
             }
         })
     }

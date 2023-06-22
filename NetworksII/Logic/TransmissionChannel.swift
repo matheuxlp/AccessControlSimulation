@@ -29,13 +29,30 @@ final class TransmissionChannel: ObservableObject {
     }
 
     func checkStatus() {
-        if self.recivingFrom.count > 1 {
+        if self.recivingFrom.isEmpty {
+            self.color = .gray
+        } else if self.recivingFrom.count > 1 {
             let channalDataDict:[String: [Int]] = ["data": self.recivingFrom]
             NotificationCenter.default.post(name: NSNotification.Name(rawValue: "CrashIdentified"), object: nil, userInfo: channalDataDict)
             self.recivingFrom = []
             self.status = .free
-            self.color = .black
+            self.color = .gray
         }
+    }
+}
+
+extension TransmissionChannel {
+    func reset() {
+        self.connectedDevices = []
+        self.recivingFrom = []
+        self.status = .free
+        self.hasCrash = false
+        self.color = .black
+        self.channelInfo = nil
+    }
+
+    func hasDevices() -> Bool {
+        return !self.connectedDevices.isEmpty
     }
 }
 
@@ -45,7 +62,7 @@ extension TransmissionChannel: DeviceDelegate {
         self.channelInfo = "All data from: Device #\(id)"
         self.status = .free
         self.recivingFrom = []
-        self.color = .black
+        self.color = .gray
     }
 
     func sendData(_ id: Int, _ time: ContinuousClock.Instant) {

@@ -8,6 +8,16 @@
 import SwiftUI
 import Combine
 
+enum SimulationStatus {
+    case running
+    case paused
+}
+
+enum TotalDevices {
+    public static let eight: Int = 3
+    public static let sixteen: Int = 5
+}
+
 final class Simulation: ObservableObject {
     
     @Published var timer: Timer.TimerPublisher = Timer.publish(every: 1, on: .main, in: .common)
@@ -26,8 +36,21 @@ final class Simulation: ObservableObject {
         self.speed = 2
     }
 
+
+}
+
+extension Simulation {
     func start() {
         self.instantiateTimer()
+    }
+
+    func reset() {
+        self.cancelTimer()
+        self.speed = 1
+        self.connectedDevices = []
+        self.status = .paused
+        self.channel.reset()
+        self.restartTimer()
     }
 
     func run() {
@@ -41,38 +64,20 @@ final class Simulation: ObservableObject {
             self.channel.checkStatus()
         }
     }
+}
 
-    func tappedDevice(_ position: (Int, Int)) {
-        if let index = self.connectedDevices.firstIndex(where: {$0.position == position}) {
-            self.connectedDevices.remove(at: index)
-        } else {
-            self.connectedDevices.append(self.createDevice(position))
-            self.channel.connectDevice(self.connectedDevices.last!)
-        }
-    }
-
-    func getDevice(_ position: (Int, Int)) -> Device? {
-        if let device = self.connectedDevices.first(where: {$0.position == position}) {
-            return device
-        }
-        return nil
-    }
-
+extension Simulation {
     func instantiateTimer() {
-        self.timer = Timer.publish(every: 1, on: .main, in: .common)
         self.connectedTimer = self.timer.connect()
-        return
     }
 
     func restartTimer() {
         self.timer = Timer.publish(every: (1 * self.speed), on: .main, in: .common)
         self.instantiateTimer()
-        return
     }
 
     func cancelTimer() {
         self.connectedTimer?.cancel()
-        return
     }
 
     func changeSpeed(_ faster: Bool = true) {
@@ -88,18 +93,4 @@ final class Simulation: ObservableObject {
         self.cancelTimer()
         self.restartTimer()
     }
-}
-
-enum SimulationStatus {
-    case running
-    case paused
-}
-
-enum TotalDevices {
-    public static let eight: Int = 3
-    public static let sixteen: Int = 5
-}
-
-extension Simulation {
-    
 }

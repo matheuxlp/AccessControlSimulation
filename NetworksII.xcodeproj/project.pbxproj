@@ -15,9 +15,9 @@
 		398CD4332A3BB64D0069749D /* Simulation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 398CD4322A3BB64D0069749D /* Simulation.swift */; };
 		398CD43D2A42249D0069749D /* ChannelComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 398CD43C2A42249D0069749D /* ChannelComponent.swift */; };
 		398CD4402A4224F50069749D /* ChannelInformationComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 398CD43F2A4224F50069749D /* ChannelInformationComponent.swift */; };
-		398CD4422A4225270069749D /* SenderInformationComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 398CD4412A4225270069749D /* SenderInformationComponent.swift */; };
+		398CD4422A4225270069749D /* DeviceInformationComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 398CD4412A4225270069749D /* DeviceInformationComponent.swift */; };
 		398CD4452A4225730069749D /* LineComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 398CD4442A4225730069749D /* LineComponent.swift */; };
-		398CD4472A42259C0069749D /* SenderSimulationComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 398CD4462A42259C0069749D /* SenderSimulationComponent.swift */; };
+		398CD4472A42259C0069749D /* DeviceSimulationComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 398CD4462A42259C0069749D /* DeviceSimulationComponent.swift */; };
 		39D97EFE2A338EF800CEA0FE /* TransmissionChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39D97EFD2A338EF800CEA0FE /* TransmissionChannel.swift */; };
 		39D97F002A338F9C00CEA0FE /* Device.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39D97EFF2A338F9C00CEA0FE /* Device.swift */; };
 		39E9FEAC2A38057C003A791C /* SimulationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39E9FEAB2A38057C003A791C /* SimulationView.swift */; };
@@ -36,9 +36,9 @@
 		398CD4322A3BB64D0069749D /* Simulation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Simulation.swift; sourceTree = "<group>"; };
 		398CD43C2A42249D0069749D /* ChannelComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelComponent.swift; sourceTree = "<group>"; };
 		398CD43F2A4224F50069749D /* ChannelInformationComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelInformationComponent.swift; sourceTree = "<group>"; };
-		398CD4412A4225270069749D /* SenderInformationComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SenderInformationComponent.swift; sourceTree = "<group>"; };
+		398CD4412A4225270069749D /* DeviceInformationComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceInformationComponent.swift; sourceTree = "<group>"; };
 		398CD4442A4225730069749D /* LineComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineComponent.swift; sourceTree = "<group>"; };
-		398CD4462A42259C0069749D /* SenderSimulationComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SenderSimulationComponent.swift; sourceTree = "<group>"; };
+		398CD4462A42259C0069749D /* DeviceSimulationComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceSimulationComponent.swift; sourceTree = "<group>"; };
 		39D97EFD2A338EF800CEA0FE /* TransmissionChannel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransmissionChannel.swift; sourceTree = "<group>"; };
 		39D97EFF2A338F9C00CEA0FE /* Device.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Device.swift; sourceTree = "<group>"; };
 		39E9FEAB2A38057C003A791C /* SimulationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimulationView.swift; sourceTree = "<group>"; };
@@ -77,10 +77,9 @@
 			isa = PBXGroup;
 			children = (
 				3967BE722A2A5A95003E82F2 /* NetworksIIApp.swift */,
-				39E9FEAF2A3805AD003A791C /* Main.swift */,
 				398CD4322A3BB64D0069749D /* Simulation.swift */,
 				39D97F012A338FB100CEA0FE /* Visual */,
-				39D97F022A338FB700CEA0FE /* Back */,
+				39D97F022A338FB700CEA0FE /* Logic */,
 				397353F92A3A390E0015FE6B /* Utils */,
 				3967BE762A2A5A97003E82F2 /* Assets.xcassets */,
 				3967BE7B2A2A5A97003E82F2 /* NetworksII.entitlements */,
@@ -133,7 +132,7 @@
 			isa = PBXGroup;
 			children = (
 				398CD43C2A42249D0069749D /* ChannelComponent.swift */,
-				398CD4462A42259C0069749D /* SenderSimulationComponent.swift */,
+				398CD4462A42259C0069749D /* DeviceSimulationComponent.swift */,
 				398CD4442A4225730069749D /* LineComponent.swift */,
 			);
 			path = Simulation;
@@ -143,7 +142,7 @@
 			isa = PBXGroup;
 			children = (
 				398CD43F2A4224F50069749D /* ChannelInformationComponent.swift */,
-				398CD4412A4225270069749D /* SenderInformationComponent.swift */,
+				398CD4412A4225270069749D /* DeviceInformationComponent.swift */,
 			);
 			path = Information;
 			sourceTree = "<group>";
@@ -157,13 +156,13 @@
 			path = Visual;
 			sourceTree = "<group>";
 		};
-		39D97F022A338FB700CEA0FE /* Back */ = {
+		39D97F022A338FB700CEA0FE /* Logic */ = {
 			isa = PBXGroup;
 			children = (
 				39D97EFD2A338EF800CEA0FE /* TransmissionChannel.swift */,
 				39D97EFF2A338F9C00CEA0FE /* Device.swift */,
 			);
-			path = Back;
+			path = Logic;
 			sourceTree = "<group>";
 		};
 		39D97F072A33DDDA00CEA0FE /* Components */ = {
@@ -178,9 +177,10 @@
 		39E9FEAA2A380565003A791C /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				39E9FEAF2A3805AD003A791C /* Main.swift */,
 				398CD4382A4224440069749D /* Simulation */,
-				398CD43A2A4224520069749D /* SideMenu */,
 				398CD4392A42244C0069749D /* Information */,
+				398CD43A2A4224520069749D /* SideMenu */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -260,13 +260,13 @@
 				39E9FEAE2A38058A003A791C /* SideMenuView.swift in Sources */,
 				398CD43D2A42249D0069749D /* ChannelComponent.swift in Sources */,
 				398CD4402A4224F50069749D /* ChannelInformationComponent.swift in Sources */,
-				398CD4472A42259C0069749D /* SenderSimulationComponent.swift in Sources */,
+				398CD4472A42259C0069749D /* DeviceSimulationComponent.swift in Sources */,
 				39E9FEB02A3805AD003A791C /* Main.swift in Sources */,
 				398CD4332A3BB64D0069749D /* Simulation.swift in Sources */,
 				398CD4452A4225730069749D /* LineComponent.swift in Sources */,
 				398CD4302A3BA9BA0069749D /* InformationView.swift in Sources */,
 				397353FB2A3A39210015FE6B /* View+Extensions.swift in Sources */,
-				398CD4422A4225270069749D /* SenderInformationComponent.swift in Sources */,
+				398CD4422A4225270069749D /* DeviceInformationComponent.swift in Sources */,
 				39E9FEAC2A38057C003A791C /* SimulationView.swift in Sources */,
 				3967BE732A2A5A95003E82F2 /* NetworksIIApp.swift in Sources */,
 			);

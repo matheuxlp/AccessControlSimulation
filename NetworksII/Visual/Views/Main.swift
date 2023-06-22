@@ -64,7 +64,7 @@ struct Main: View {
                 ToolbarItem(placement: .principal) {
                     Button(action: {
                         withAnimation {
-                            //self.showMenu.toggle()
+                            self.simulation.reset()
                         }
                     }, label: {
                         Image(systemName: "arrow.counterclockwise")

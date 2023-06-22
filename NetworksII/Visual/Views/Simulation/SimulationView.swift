@@ -116,11 +116,7 @@ extension SimulationView { // Devices & Channel
     @ViewBuilder
     private func buildElements(_ position: (Int, Int)) -> some View {
         if self.simulation.isMiddle(position) {
-            if !self.simulation.channel.connectedDevices.isEmpty {
-                ChannelComponent(channel: self.simulation.channel)
-            } else {
-                Text("a")
-            }
+            ChannelComponent(channel: self.simulation.channel)
         } else {
             self.buildDevice(position)
         }

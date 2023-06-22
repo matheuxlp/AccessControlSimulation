@@ -25,7 +25,7 @@ final class Device: ObservableObject, Identifiable {
     @Published var crash: Bool = false
     @Published var color: Color = .black
     @Published var status: DeviceStatus = DeviceStatus.cantSendData
-    @Published var timeRemaning: Double = 0
+    @Published var timeRemaining: Double = 0
     @Published var timeForNewData: Double = 0
     @Published var randonBackoff: Bool = true
     @Published var definedBackoff: Double = 0
@@ -34,7 +34,7 @@ final class Device: ObservableObject, Identifiable {
     @Published var currentAttempt: Int = 0
     @Published var maxAttempts: Int
     @Published var initialBackoff: Double?
-    @Published var currentbackoff: Double?
+    @Published var currentBackoff: Double?
 
     //DELEGATE
     weak var delegate: DeviceDelegate?
@@ -50,46 +50,29 @@ final class Device: ObservableObject, Identifiable {
         NotificationCenter.default.addObserver(self, selector: #selector(self.recivedCrash(notification:)), name: Notification.Name("CrashIdentified"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(self.recivedCanSend(notification:)), name: Notification.Name("Device\(id)CanSend"), object: nil)
     }
+}
 
+extension Device { // logic
     public func run(_ channel: TransmissionChannel) {
-        switch self.status {
-        case .sensingChannel:
-            self.senseChannel(channel)
-        case .sendingData:
-            self.sendData()
-        case .canSendData:
-            self.delegate?.startedToSendData(self.id)
-        case .cantSendData:
-            self.status = .sensingChannel
-        case .channelCrash:
-            self.status = .backoff
-        case .backoff:
-            self.performBackoff()
-        case .waitingForData:
-            self.waitForData()
-        }
-        self.setColor()
-        setTimeRemaining()
-    }
-
-    func setId(_ id: Int) {
-        self.id = id
-    }
-
-    func setTimeRemaining() {
-        switch self.status {
-        case .backoff:
-            if let backoff = self.currentbackoff {
-                self.timeRemaning = backoff - control
+        withAnimation {
+            switch self.status {
+            case .sensingChannel:
+                self.senseChannel(channel)
+            case .sendingData:
+                self.sendData()
+            case .canSendData:
+                self.delegate?.startedToSendData(self.id)
+            case .cantSendData:
+                self.status = .sensingChannel
+            case .channelCrash:
+                self.status = .backoff
+            case .backoff:
+                self.performBackoff()
+            case .waitingForData:
+                self.waitForData()
             }
-        case .sensingChannel:
-            self.timeRemaning = self.sensingTime - self.control
-        case .sendingData:
-            self.timeRemaning = self.dataSize - self.control
-        case .waitingForData:
-            self.timeRemaning = self.timeForNewData - self.control
-        default:
-            self.timeRemaning = 0
+            self.setColor()
+            self.setTimeRemaining()
         }
     }
 
@@ -127,6 +110,65 @@ final class Device: ObservableObject, Identifiable {
             self.timeForNewData = Double(Int.random(in: 1...10))
         }
     }
+}
+
+extension Device { // backgoff
+
+    func performBackoff() {
+        if self.initialBackoff == nil {
+            self.initialBackoff = self.randonBackoff ? Double(Int.random(in: 0...5)) : self.definedBackoff
+            self.currentBackoff = self.initialBackoff
+            self.control = 0
+        } else if self.currentBackoff == nil {
+            self.currentBackoff = self.getBackoffTime()
+        } else if self.currentAttempt == self.maxAttempts {
+            self.currentAttempt = 0
+            self.initialBackoff = nil
+            self.currentBackoff = nil
+            return
+        }
+        if self.control == self.currentBackoff {
+            self.control = 0
+            self.currentAttempt += 1
+            self.currentBackoff = nil
+            self.status = .sensingChannel
+        } else {
+            self.control += 1
+            self.setTimeRemaining()
+        }
+    }
+
+
+    func getBackoffTime() -> TimeInterval {
+        guard let initialBackoff = self.initialBackoff else {
+            return 0.0
+        }
+        var backoff: Double = initialBackoff
+        for _ in 0..<currentAttempt {
+            backoff *= initialBackoff
+        }
+        return backoff
+    }
+}
+
+extension Device { // visual
+
+    func setTimeRemaining() {
+        switch status {
+        case .backoff:
+            if let currentBackoff = currentBackoff {
+                timeRemaining = currentBackoff - control
+            }
+        case .sensingChannel:
+            timeRemaining = sensingTime - control
+        case .sendingData:
+            timeRemaining = dataSize - control
+        case .waitingForData:
+            timeRemaining = timeForNewData - control
+        default:
+            timeRemaining = 0
+        }
+    }
 
     func setColor() {
         switch self.status {
@@ -147,60 +189,34 @@ final class Device: ObservableObject, Identifiable {
         }
     }
 
+}
+
+extension Device {
+    func setId(_ id: Int) {
+        self.id = id
+    }
+}
+
+extension Device { // notification
     @objc func recivedCrash(notification: Notification) {
-        self.status = .channelCrash
-        if let data = notification.userInfo?["data"] as? [Int] {
-            if data.contains(self.id) {
-                self.color = .red
+        withAnimation {
+            self.status = .channelCrash
+            if let data = notification.userInfo?["data"] as? [Int] {
+                if data.contains(self.id) {
+                    self.color = .red
+                } else {
+                    self.color = .gray
+                }
             } else {
                 self.color = .gray
             }
-        } else {
-            self.color = .gray
         }
     }
 
     @objc func recivedCanSend(notification: Notification) {
-        self.status = .sendingData
-    }
-
-}
-
-extension Device {
-    func performBackoff() {
-        if self.initialBackoff == nil {
-            if self.randonBackoff {
-                self.initialBackoff = Double(Int.random(in: 0...5))
-            } else {
-                self.initialBackoff = self.definedBackoff
-            }
-            self.currentbackoff = self.initialBackoff
-            self.control = 0
-        } else if self.currentbackoff == nil {
-            self.currentbackoff = self.getBackoffTime()
-        } else if self.currentAttempt == self.maxAttempts {
-            self.currentAttempt = 0
-            self.initialBackoff = nil
-            self.currentbackoff = nil
-            return
+        withAnimation {
+            self.status = .sendingData
         }
-        if self.control == self.currentbackoff {
-            self.control = 0
-            self.currentAttempt += 1
-            self.currentbackoff = nil
-            self.status = .sensingChannel
-        } else {
-            self.control += 1
-            self.setTimeRemaining()
-        }
-    }
-
-    func getBackoffTime() -> TimeInterval {
-        var backoff: Double = self.initialBackoff!
-        for _ in 0..<currentAttempt {
-            backoff = backoff * self.initialBackoff!
-        }
-        return backoff
     }
 }
 

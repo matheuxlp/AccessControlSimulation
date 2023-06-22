@@ -14,17 +14,11 @@ struct DeviceInformationComponent: View {
         ZStack {
             Color.gray.opacity(0.75)
             self.device.color.opacity(0.25)
-            HStack {
-                VStack(alignment: .leading) {
-                    Image(systemName: "circle.dashed")
-                        .font(.system(size: 32))
-                        .symbolRenderingMode(.monochrome)
-                        .foregroundColor(.black)
-                        .padding(8)
-                        .background(Color.white)
-                        .clipShape(Circle())
-                        .overlay(Circle().stroke(self.device.color, lineWidth: 2))
+            HStack(spacing: 16) {
+                VStack(alignment: .center) {
                     Text("Device #\(device.id)")
+                        .bold()
+                    DeviceSimulationComponent(device: device)
                 }
                 if self.expanded {
                     self.buildEditable()
@@ -67,12 +61,62 @@ struct DeviceInformationComponent: View {
     @ViewBuilder
     private func buildInformation() -> some View  {
         VStack(alignment: .leading) {
-            Spacer()
-            Text("Status: \(self.device.status.rawValue) | (\(self.device.timeRemaning, specifier: "%.0f"))")
-            Text("Sensing time: \(device.sensingTime, specifier: "%.0f")")
-            Text("Data size: \(device.dataSize, specifier: "%.0f")")
-            Text("Time for new data: \(device.timeForNewData, specifier: "%.0f")")
+            //Spacer()
+            switch self.device.status {
+            case .backoff:
+                Text("BACKOFF")
+                    .bold()
+                Text("Backoff period: \(self.device.currentBackoff ?? 0, specifier: "%.0f")TU")
+                Text("Current attempt: \(self.device.currentAttempt, specifier: "%.0f")")
+                Spacer()
+                HStack {
+                    Spacer()
+                    Text("TR: \(self.device.timeRemaining, specifier: "%.0f")TU")
+                }
+                //Text("Time remaining: \(self.device.timeRemaining, specifier: "%.0f")TU")
+            case .sensingChannel:
+                Text("SENSING")
+                    .bold()
+                Text("Sensing period: \(self.device.sensingTime, specifier: "%.0f")TU")
+                Spacer()
+                HStack {
+                    Spacer()
+                    Text("TR: \(self.device.timeRemaining, specifier: "%.0f")TU")
+                }
+                //Text("Time remaining: \(self.device.timeRemaining, specifier: "%.0f")TU")
+            case .sendingData:
+                Text("SENDING DATA")
+                    .bold()
+                Text("Data size: \(self.device.dataSize, specifier: "%.0f")TU")
+                Spacer()
+                HStack {
+                    Spacer()
+                    Text("TR: \(self.device.timeRemaining, specifier: "%.0f")TU")
+                }
+            case .waitingForData:
+                Text("WAITING FOR NEW DATA")
+                    .bold()
+                Text("Wait period: \(self.device.timeForNewData, specifier: "%.0f")TU")
+                Spacer()
+                HStack {
+                    Spacer()
+                    Text("TR: \(self.device.timeRemaining, specifier: "%.0f")TU")
+                }
+            case .canSendData:
+                VStack {
+                    Text("CHANNEL FREE, CAN SEND DATA")
+                        .bold()
+                }
+            case .channelCrash:
+                VStack {
+                    Text("CHANNEL FREE, CAN SEND DATA")
+                        .bold()
+                }
+            default:
+                EmptyView()
+            }
         }
+        .padding(.trailing, 16)
     }
 
     @ViewBuilder
@@ -103,7 +147,7 @@ struct DeviceInformationComponent: View {
                 }
             }
         }
-        .padding(.horizontal, 16)
+        .padding(.trailing, 16)
 
     }
 }
