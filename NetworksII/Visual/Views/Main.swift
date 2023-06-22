@@ -64,10 +64,19 @@ struct Main: View {
                 ToolbarItem(placement: .principal) {
                     Button(action: {
                         withAnimation {
-                            self.simulation.reset()
+                            self.simulation.restart()
                         }
                     }, label: {
                         Image(systemName: "arrow.counterclockwise")
+                    })
+                }
+                ToolbarItem(placement: .principal) {
+                    Button(action: {
+                        withAnimation {
+                            self.simulation.reset()
+                        }
+                    }, label: {
+                        Image(systemName: "xmark")
                     })
                 }
             }

@@ -17,9 +17,13 @@ final class TransmissionChannel: ObservableObject {
     @Published var connectedDevices: [Device] = []
     @Published var channelInfo: (String?, String?)
     @Published var color: Color = .black
-    weak var delegate: TransmissionChannelDelegate?
+
+    var calendar = Calendar.current
     var recivingFrom: [Int] = []
     var hasCrash: Bool = false
+
+    //DELEGATE
+    weak var delegate: TransmissionChannelDelegate?
 
     func connectDevice(_ device: Device) {
         device.delegate = self
@@ -38,7 +42,7 @@ final class TransmissionChannel: ObservableObject {
         } else if self.recivingFrom.count > 1 {
             let channalDataDict:[String: [Int]] = ["data": self.recivingFrom]
             NotificationCenter.default.post(name: NSNotification.Name(rawValue: "CrashIdentified"), object: nil, userInfo: channalDataDict)
-            self.delegate?.logInfo(log: "Channel crash")
+            self.delegate?.logInfo(log: "[\(Date())]Channel crash")
             self.channelInfo = (nil, nil)
             self.recivingFrom = []
             self.status = .free
@@ -48,6 +52,15 @@ final class TransmissionChannel: ObservableObject {
 }
 
 extension TransmissionChannel {
+
+    func restart() {
+        self.recivingFrom = []
+        self.status = .free
+        self.hasCrash = false
+        self.color = .black
+        self.channelInfo = (nil, nil)
+    }
+
     func reset() {
         self.connectedDevices = []
         self.recivingFrom = []
@@ -70,18 +83,18 @@ extension TransmissionChannel: DeviceDelegate {
         self.recivingFrom = []
         self.color = .gray
         self.channelInfo = (nil, nil)
-        self.delegate?.logInfo(log: "Recived all data from: Device #\(id)")
+        self.delegate?.logInfo(log: "[\(Date())]Recived all data from: Device #\(id)")
     }
 
     func sendData(_ id: Int, _ time: ContinuousClock.Instant) {
         self.channelInfo.0 = "Recived data from:"
         self.channelInfo.1 = "Device #\(id)"
-        self.delegate?.logInfo(log: "Recived data from: Device #\(id)")
+        self.delegate?.logInfo(log: "[\(Date())]Recived data from: Device #\(id)")
     }
 
     func startedToSendData(_ id: Int) {
         self.channelInfo.0 = "Device #\(id), started to send data."
-        self.delegate?.logInfo(log: "Device #\(id), started to send data.")
+        self.delegate?.logInfo(log: "[\(Date())]Device #\(id), started to send data.")
         self.status = .occupied
         self.recivingFrom.append(id)
         self.color = .green

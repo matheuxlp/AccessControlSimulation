@@ -31,7 +31,7 @@ final class Device: ObservableObject, Identifiable {
     @Published var definedBackoff: Double = 0
 
     // BACKOFF
-    @Published var currentAttempt: Int = 0
+    @Published var currentAttempt: Int = 1
     @Published var maxAttempts: Int
     @Published var initialBackoff: Double?
     @Published var currentBackoff: Double?
@@ -122,7 +122,7 @@ extension Device { // backgoff
         } else if self.currentBackoff == nil {
             self.currentBackoff = self.getBackoffTime()
         } else if self.currentAttempt == self.maxAttempts {
-            self.currentAttempt = 0
+            self.currentAttempt = 1
             self.initialBackoff = nil
             self.currentBackoff = nil
             return
@@ -194,6 +194,20 @@ extension Device { // visual
 extension Device {
     func setId(_ id: Int) {
         self.id = id
+    }
+
+    func restart() {
+        self.control = 0
+        self.status = .cantSendData
+        self.currentAttempt = 0
+        self.initialBackoff = nil
+        self.currentBackoff = nil
+        self.color = .black
+        self.randonBackoff = true
+        self.timeRemaining = 0
+        self.timeForNewData = 0
+        self.randonBackoff = true
+        self.definedBackoff = 0
     }
 }
 

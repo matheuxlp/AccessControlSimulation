@@ -50,9 +50,14 @@ struct SideMenuView: View {
                 }
                 // log
                 VStack {
-                    ScrollView {
-                        ForEach(0..<self.simulation.infomationLog.count, id: \.self) { index in
-                            Text("\(self.simulation.infomationLog[index])")
+                    ZStack {
+                        Color.clear
+                        ScrollView {
+                            VStack(alignment: .leading) {
+                                ForEach(0..<self.simulation.infomationLog.count, id: \.self) { index in
+                                    Text("\(self.simulation.infomationLog[index])")
+                                }
+                            }
                         }
                     }
                 }

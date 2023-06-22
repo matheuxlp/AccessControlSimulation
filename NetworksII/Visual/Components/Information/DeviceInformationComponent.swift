@@ -73,7 +73,6 @@ struct DeviceInformationComponent: View {
                     Spacer()
                     Text("TR: \(self.device.timeRemaining, specifier: "%.0f")TU")
                 }
-                //Text("Time remaining: \(self.device.timeRemaining, specifier: "%.0f")TU")
             case .sensingChannel:
                 Text("SENSING")
                     .bold()
@@ -83,7 +82,6 @@ struct DeviceInformationComponent: View {
                     Spacer()
                     Text("TR: \(self.device.timeRemaining, specifier: "%.0f")TU")
                 }
-                //Text("Time remaining: \(self.device.timeRemaining, specifier: "%.0f")TU")
             case .sendingData:
                 Text("SENDING DATA")
                     .bold()
@@ -109,7 +107,7 @@ struct DeviceInformationComponent: View {
                 }
             case .channelCrash:
                 VStack {
-                    Text("CHANNEL FREE, CAN SEND DATA")
+                    Text("CHANNEL CRASH")
                         .bold()
                 }
             default:

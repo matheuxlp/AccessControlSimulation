@@ -45,6 +45,15 @@ extension Simulation {
         self.channel.delegate = self
     }
 
+    func restart() {
+        self.status = .paused
+        self.restartTimer()
+        self.channel.restart()
+        for device in self.connectedDevices {
+            device.restart()
+        }
+    }
+
     func reset() {
         self.cancelTimer()
         self.speed = 1
