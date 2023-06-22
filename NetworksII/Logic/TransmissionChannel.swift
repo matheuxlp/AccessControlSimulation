@@ -8,12 +8,16 @@
 import Foundation
 import SwiftUI
 
+protocol TransmissionChannelDelegate: AnyObject {
+    func logInfo(log: String)
+}
 
 final class TransmissionChannel: ObservableObject {
     @Published var status: ChannelStatus = ChannelStatus.free
     @Published var connectedDevices: [Device] = []
     @Published var channelInfo: (String?, String?)
     @Published var color: Color = .black
+    weak var delegate: TransmissionChannelDelegate?
     var recivingFrom: [Int] = []
     var hasCrash: Bool = false
 
@@ -34,6 +38,7 @@ final class TransmissionChannel: ObservableObject {
         } else if self.recivingFrom.count > 1 {
             let channalDataDict:[String: [Int]] = ["data": self.recivingFrom]
             NotificationCenter.default.post(name: NSNotification.Name(rawValue: "CrashIdentified"), object: nil, userInfo: channalDataDict)
+            self.delegate?.logInfo(log: "Channel crash")
             self.channelInfo = (nil, nil)
             self.recivingFrom = []
             self.status = .free
@@ -65,15 +70,18 @@ extension TransmissionChannel: DeviceDelegate {
         self.recivingFrom = []
         self.color = .gray
         self.channelInfo = (nil, nil)
+        self.delegate?.logInfo(log: "Recived all data from: Device #\(id)")
     }
 
     func sendData(_ id: Int, _ time: ContinuousClock.Instant) {
         self.channelInfo.0 = "Recived data from:"
         self.channelInfo.1 = "Device #\(id)"
+        self.delegate?.logInfo(log: "Recived data from: Device #\(id)")
     }
 
     func startedToSendData(_ id: Int) {
         self.channelInfo.0 = "Device #\(id), started to send data."
+        self.delegate?.logInfo(log: "Device #\(id), started to send data.")
         self.status = .occupied
         self.recivingFrom.append(id)
         self.color = .green

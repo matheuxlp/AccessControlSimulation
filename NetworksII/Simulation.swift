@@ -28,6 +28,8 @@ final class Simulation: ObservableObject {
     @Published var status: SimulationStatus
     @Published var speed: Double
 
+    @Published var infomationLog: [String] = []
+
     init() {
         self.totalDevices = TotalDevices.eight
         self.channel = TransmissionChannel()
@@ -35,19 +37,19 @@ final class Simulation: ObservableObject {
         self.status = .paused
         self.speed = 2
     }
-
-
 }
 
 extension Simulation {
     func start() {
         self.instantiateTimer()
+        self.channel.delegate = self
     }
 
     func reset() {
         self.cancelTimer()
         self.speed = 1
         self.connectedDevices = []
+        self.infomationLog = []
         self.status = .paused
         self.channel.reset()
         self.restartTimer()
@@ -92,5 +94,11 @@ extension Simulation {
         }
         self.cancelTimer()
         self.restartTimer()
+    }
+}
+
+extension Simulation: TransmissionChannelDelegate {
+    func logInfo(log: String) {
+        self.infomationLog.append(log)
     }
 }

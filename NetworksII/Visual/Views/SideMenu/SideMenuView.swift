@@ -48,6 +48,15 @@ struct SideMenuView: View {
                         Text("+")
                     }
                 }
+                // log
+                VStack {
+                    ScrollView {
+                        ForEach(0..<self.simulation.infomationLog.count, id: \.self) { index in
+                            Text("\(self.simulation.infomationLog[index])")
+                        }
+                    }
+                }
+                .border(.red)
             }
         }
     }
