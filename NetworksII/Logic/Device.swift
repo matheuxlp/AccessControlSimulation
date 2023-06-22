@@ -30,7 +30,7 @@ final class Device: ObservableObject, Identifiable {
     @Published var waitForNewData: Bool = true
 
     // BACKOFF
-    @Published var currentAttempt: Int = 1
+    @Published var currentAttempt: Int = 0
     @Published var maxAttempts: Int
     @Published var initialBackoff: Double?
     @Published var currentBackoff: Double?
@@ -92,11 +92,14 @@ extension Device { // logic
         if channel.status == .occupied {
             self.status = .sensingChannel
             self.control = 0
+            // Reset Backoff
+            self.initialBackoff = nil
+            self.currentBackoff = nil
+            self.currentAttempt = 0
         } else {
             if self.control == self.sensingTime {
                 self.status = .canSendData
                 self.control = 0
-            } else {
             }
         }
     }
@@ -114,6 +117,12 @@ extension Device { // logic
                 self.status = .sendingData
             }
         }
+        if self.initialBackoff == nil {
+            // Reset Backoff
+            self.initialBackoff = nil
+            self.currentBackoff = nil
+            self.currentAttempt = 0
+        }
     }
 }
 
@@ -127,7 +136,7 @@ extension Device { // backgoff
         } else if self.currentBackoff == nil {
             self.currentBackoff = self.getBackoffTime()
         } else if self.currentAttempt == self.maxAttempts {
-            self.currentAttempt = 1
+            self.currentAttempt = 0
             self.initialBackoff = nil
             self.currentBackoff = nil
             return

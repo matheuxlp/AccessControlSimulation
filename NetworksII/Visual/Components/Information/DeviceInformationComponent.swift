@@ -145,9 +145,9 @@ struct DeviceInformationComponent: View {
                 }
             }
             HStack {
-                Text("Wait time:")
+                Text("Wait time for new data:")
                 withAnimation {
-                    Toggle("", isOn: self.$device.randonBackoff)
+                    Toggle("", isOn: self.$device.waitForNewData)
                 }
                 Spacer()
             }

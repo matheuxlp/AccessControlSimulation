@@ -31,7 +31,7 @@ final class Simulation: ObservableObject {
     @Published var infomationLog: [String] = []
 
     init() {
-        self.totalDevices = TotalDevices.eight
+        self.totalDevices = TotalDevices.sixteen
         self.channel = TransmissionChannel()
         self.connectedDevices = []
         self.status = .paused
